@@ -1,6 +1,6 @@
 ---
 description: Render the WBS subtree from a node with status rollup, phase tags, and orchestrator-surfaced warnings.
-argument-hint: [task-id]
+argument-hint: [task-id] [project=<name>]
 ---
 
 # /wbs-status
@@ -10,10 +10,11 @@ Render the WBS subtree from the given node (or from the project root if none) wi
 ## Arguments
 
 - `[task-id]` (optional) — Tusk task short ID. Defaults to the current task context, or to the project root if no context exists.
+- `[project=<name>]` (optional) — explicit Tusk project to render. Overrides context resolution. Use when inspecting a project other than the active one.
 
 ## Procedure
 
-1. **Resolve the target node.** Use the explicit task-id, or the orchestrator's current-task context, or the project root.
+1. **Resolve the target project and node.** If `project=<name>` was passed, use that project — confirm it exists via `tusk_project_get`, hard error if not. Otherwise, fall back to context resolution. Then resolve the node from the explicit task-id, or the orchestrator's current-task context, or the project root.
 
 2. **Fetch the subtree.** Call Tusk MCP — `tusk_task_tree` for the structure and `tusk_task_summary` (or `tusk task tree --rollup` via shell) for `%done` rollup from descendants.
 
@@ -34,12 +35,14 @@ Render the WBS subtree from the given node (or from the project root if none) wi
 ## Errors
 
 - **Tusk MCP unavailable** — hard error with remediation pointer.
+- **Specified `project=<name>` does not exist** — hard error. List available projects from `tusk_project_list`.
 - **Task ID not found** — surface Tusk's error verbatim and suggest `/wbs-status` with no argument to view the project root.
 
 ## Examples
 
 ```
-/wbs-status                     # the active project, from root
-/wbs-status a3f8b2c1             # subtree rooted at task a3f8b2c1
-/wbs-status a3f8b2c1 --depth=2   # limit subtree depth
+/wbs-status                       # the active project, from root
+/wbs-status a3f8b2c1              # subtree rooted at task a3f8b2c1
+/wbs-status a3f8b2c1 --depth=2    # limit subtree depth
+/wbs-status project=infra         # root tree of the infra project
 ```
