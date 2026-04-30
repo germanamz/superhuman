@@ -21,7 +21,7 @@ Do **not** invoke for tasks in projects with no WBS taxonomy, or for non-Tusk fi
 
 ### 1. Detect Tusk context
 
-- Call `tusk_project_get` (or `tusk_project_list`) to identify the active project.
+- If the invoking command passed an explicit `project=<name>` argument, use that project — confirm it exists via `tusk_project_get`, hard error if not. Otherwise, call `tusk_project_get` (or `tusk_project_list`) to identify the active project.
 - Hard error if Tusk MCP is unreachable. Point at `templates/wbs/taxonomy.md` for setup.
 - Hard error if the project has no taxonomy. Surface the recommended taxonomy from `templates/wbs/taxonomy.md` and offer to apply it (workspace-wide or per-project).
 

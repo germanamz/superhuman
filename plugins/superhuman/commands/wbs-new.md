@@ -1,6 +1,6 @@
 ---
 description: Create a Tusk task at a WBS level under the current parent, with the level-appropriate description template populated.
-argument-hint: <level> [title]
+argument-hint: <level> [title] [project=<name>]
 ---
 
 # /wbs-new
@@ -11,10 +11,11 @@ Create a new WBS node — a Tusk task — at the given level under the current p
 
 - `<level>` (required) — one of: `milestone`, `initiative`, `story`, `task`, `spike`. Must match the active project's taxonomy.
 - `[title]` (optional) — the task title. If omitted, prompt the user for it before creating.
+- `[project=<name>]` (optional) — explicit Tusk project to file the node under. Overrides context resolution. Use when working across projects or when the active project is ambiguous.
 
 ## Procedure
 
-1. **Resolve the active Tusk Project.** Use Tusk MCP (`tusk_project_list` or `tusk_project_get`) to determine the current project. If multiple projects exist and none is implied by context, ask the user which one.
+1. **Resolve the target Tusk Project.** If `project=<name>` was passed, use that — confirm it exists via `tusk_project_get`, hard error if not. Otherwise, fall back to context: call `tusk_project_list` / `tusk_project_get` to determine the active project, and if multiple projects exist and none is implied by context, ask the user which one.
 
 2. **Validate the level against the project's taxonomy.** Call `tusk_project_settings_get` (or equivalent) to fetch the taxonomy. Confirm `<level>` appears in the rank list. If the project has no WBS taxonomy, surface a hard error pointing at `templates/wbs/taxonomy.md`.
 
@@ -40,6 +41,7 @@ Create a new WBS node — a Tusk task — at the given level under the current p
 ## Errors
 
 - **Tusk MCP unavailable** — hard error with remediation pointer. Do not fall back to file-based design.
+- **Specified `project=<name>` does not exist** — hard error. List available projects from `tusk_project_list` so the user can correct the typo.
 - **No taxonomy on the project** — hard error pointing at `templates/wbs/taxonomy.md`.
 - **Invalid level / rank parent mismatch** — surface Tusk's validation error verbatim.
 - **Skipping ranks (e.g., `/wbs-new story` directly under a Project)** — allow but flag with a warning. Tusk permits any-ancestor-to-any-descendant parenting.
@@ -52,4 +54,5 @@ Create a new WBS node — a Tusk task — at the given level under the current p
 /wbs-new story "Implement /api/auth/refresh endpoint"
 /wbs-new task "Add JWTRefreshHandler to auth router"
 /wbs-new spike "Compare HS256 vs RS256 for our deployment scale"
+/wbs-new milestone "Q3 platform overhaul" project=infra
 ```
