@@ -81,7 +81,7 @@ When planning a Story's implementation:
    - The directive that the plan output must land as a Tusk note (`meta.type=plan`), not as `docs/superpowers/plans/<file>.md`.
 2. Let writing-plans produce the plan content.
 3. Post the plan via `tusk_note_create` with `task=<story-id>, meta.type=plan, body=<plan-content>`.
-4. If the plan has phases (heavy phasing — multiple implementer agents, sequential dependencies, etc.), per-phase notes are added with `meta.type=phase-plan, meta.phase=phase-N`. Each phase note follows `templates/wbs/note-phase-plan-heavy.md`.
+4. If the plan has phases (heavy phasing — multiple implementer subagents per Tusk task, sequential bridge-code dependencies, etc.), `superhuman:phase-planning-rules` auto-invokes; let it drive the per-phase note shape and the 4–6 task split. Per-phase notes land as `meta.type=phase-plan, meta.phase=phase-N` on the Story, following `templates/wbs/note-phase-plan-heavy.md`. After all phase-plan notes are drafted, `superhuman:phase-continuity-review` auto-invokes before any task is dispatched. After each phase's tasks are workflow-completed and after all phases ship, `superhuman:phase-post-implementation-review` auto-invokes for the per-phase gate and final sequence verification.
 5. Each task in the plan becomes a child Tusk task at `level=task` parented to the Story, tagged `+phase-N` if the plan is phased. Use `/wbs-new task` for each — do not bypass the command.
 
 ### 7. Enforce the Karpathy decomposition gate
