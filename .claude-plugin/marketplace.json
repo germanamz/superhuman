@@ -9,10 +9,7 @@
     {
       "name": "superhuman",
       "description": "Starter plugin scaffold for the superhuman marketplace",
-      "source": {
-        "type": "path",
-        "path": "./plugins/superhuman"
-      }
+      "source": "./plugins/superhuman"
     }
   ]
 }

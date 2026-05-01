@@ -1,0 +1,47 @@
+[storage]
+backend = 'sqlite'
+path = './.tusk/data.db'
+
+[storage.postgres]
+dsn = ''
+
+[urgency]
+priority_weight = 6.0
+due_weight = 12.0
+age_weight = 2.0
+active_weight = 4.0
+blocking_weight = 8.0
+blocked_weight = -5.0
+tags_weight = 1.0
+project_weight = 1.0
+annotations_weight = 1.0
+waiting_weight = -3.0
+
+[tui]
+date_format = '2006-01-02'
+color = true
+tree_indent = 2
+default_sort = 'urgency'
+
+[mcp]
+disabled_tool_groups = []
+disabled_tools = ['tusk_config_set', 'tusk_workflow_create', 'tusk_workflow_modify', 'tusk_workflow_delete', 'tusk_project_create', 'tusk_project_modify', 'tusk_project_delete']
+disabled_resource_groups = []
+disabled_resources = []
+
+[mcp.blocked_fields]
+tusk_project_delete = ['force']
+tusk_project_modify = ['workflow']
+
+[inline]
+max_expansion_size = 1048576
+
+[notes]
+window_size = 20
+
+[events]
+max_events = 10000
+prune_slack = 1000
+
+[taxonomy]
+levels = []
