@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "tusk": {
+      "type": "stdio",
+      "command": "tusk",
+      "args": [
+        "mcp",
+        "serve"
+      ],
+      "env": {}
+    }
+  }
+}
