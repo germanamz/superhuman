@@ -203,6 +203,35 @@ The discipline: lean tickets, rich notes. An implementer should be able to read 
 
 ---
 
+## Changing direction mid-flight
+
+The WBS is built top-down, but you'll often discover that an earlier shape was wrong only when working a child:
+
+- Brainstorming a Story reveals the parent Initiative ruled out something the new design needs.
+- Implementation surfaces that a Story should be split into two.
+- Priorities shift and a whole branch should be retired.
+
+When this happens, run `/wbs-reshape <task-id>` on the node whose shape needs to change. The reshape skill will:
+
+1. Load the original spec, plan, and child outline so you can see *why* the current shape was drawn.
+2. Ask what you learned that triggered the reshape (free text — capture this thoroughly; the reasoning is what makes the audit note valuable).
+3. Run the brainstorming skill with that context to develop the new shape.
+4. For each direct child of the focal node, ask: keep unchanged, reparent (subtree comes along — Tusk handles it), or archive.
+5. Post a `meta.type=reshape` note on the focal node capturing the trigger, reasoning, invalidated assumptions, original shape, and new shape. This is the audit trail.
+6. Re-run the Karpathy gate on the new description.
+
+Reshape is reversible by deliberate action — archived tasks remain queryable, and you can reparent them back into the live tree if you change your mind. Hard delete is never used.
+
+You don't always have to invoke `/wbs-reshape` explicitly. While brainstorming or planning, the orchestrator watches for contradictions with parent scope. If it detects one, it will surface a three-choice prompt:
+
+- **Reshape the parent now** (pause your current brainstorm/plan, fix the parent, then resume).
+- **Accept the deviation** (record the divergence as an `## Open Questions` entry on your child spec — becomes a forcing function for whoever reshapes the parent later).
+- **Abandon this brainstorm** (drop the in-flight content, reshape the parent first, restart fresh).
+
+Use `/wbs-reshape` for scope changes that invalidate prior assumptions. Trivial typo-fixes and phrasing edits don't need it — those go through `tusk_task_modify` directly.
+
+---
+
 ## Common situations
 
 ### "Tusk MCP isn't reachable"
