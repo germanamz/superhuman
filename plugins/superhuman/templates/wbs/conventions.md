@@ -43,8 +43,10 @@ If neither applies, "No phases needed" is the right answer in the Phasing field.
 ## Tag and metadata naming
 
 - Phase identification: tag children `+phase-1`, `+phase-2`, etc.
-- Note types: `meta.type=brainstorm | spec | plan | phase-plan`
+- Note types: `meta.type=brainstorm | spec | plan | phase-plan | reshape`
 - Phase association on notes: `meta.phase=phase-1`, `meta.phase=phase-2`
+- Reshape lineage on reshape notes: `meta.reshape-of-spec=<spec-note-id>`, `meta.parent-reshape=<reshape-note-id>` (when nested)
+- Archive marker on tasks: tag `+reshape-archived`
 - WBS-specific reserved namespace: any tag or metadata key prefixed with `wbs-`
 
 ## Decomposition gate
@@ -57,6 +59,37 @@ The orchestrator skill enforces this gate before allowing a node to transition t
 
 The gate refuses to auto-fill missing fields. The user (or agent) must populate them deliberately.
 
+## Reshaping
+
+The WBS is built top-down, but discovery is iterative. Brainstorming a child can surface that a parent's scope was wrong; implementation can reveal a story should be split; priorities can shift. **Reshape** is the structured response: re-brainstorm a node with full context of its original reasoning, then archive or reparent descendants based on the new shape. Mechanical subtree editing (drag-this-branch-here-then-fix-up-everything) is explicitly *not* the goal — context-aware re-brainstorm is.
+
+A reshape always:
+
+1. Records the **reasoning that triggered it** in a `meta.type=reshape` note on the focal node — the user's voice, not a mechanical diff. Load-bearing: a future reader sees the prior spec, the new spec, and the reshape note bridges them with the learning.
+2. Archives the prior `meta.type=spec` and `meta.type=plan` notes on the focal node.
+3. Posts a new `meta.type=spec` note via wrapped brainstorming.
+4. Updates each direct child to one of three states: kept unchanged, reparented (subtree comes along), or archived.
+5. Re-runs the Karpathy decomposition gate on the focal node's new description.
+
+Use `/wbs-reshape <task-id>` to invoke explicitly, or let `wbs-orientation` auto-offer when an end-of-brainstorm, planning-time, or decomposition-gate signal indicates contradiction with parent context.
+
+## Archive semantics
+
+When a task is archived by reshape:
+
+- It transitions to the workflow's terminal cancelled status. If the project workflow has no cancelled status, reshape refuses to proceed.
+- It gets a `+reshape-archived` tag, distinguishing reshape-archive from user-driven cancellation.
+- Its description is prepended with a one-line stamp pointing at the reshape note: `> **Archived by reshape on <YYYY-MM-DD>.** See reshape note <short-id> on <focal-node-id>.` — original content preserved below.
+- All non-archived notes on the task are archived via `tusk_note_archive`.
+- Descendants that weren't explicitly reparented out are archived recursively.
+- Tasks in `in_progress` or `in_review` require user confirmation before archive — no soft skip.
+
+Archive is reversible by deliberate user action (reparent back into the live tree, transition out of cancelled, remove the tag). Hard delete is never used.
+
+## Deferred reshapes
+
+When a child is reparented during a reshape but the user declines to reshape it now under its new parent, the child gets an explicit `## Open Questions` entry: "Reshape under new parent <new-parent-id> context — deferred from reshape <short-id> on <YYYY-MM-DD>." The next time the Karpathy gate runs on that child (e.g., before its decomposition or before it's brainstormed again), the open question forces resolution. Deferred reshapes are also listed in the focal node's reshape audit note.
+
 ## Bypass consequences
 
 If you run `/brainstorm` directly (not via the WBS orchestrator), the brainstorming skill will write the spec to `docs/superpowers/specs/<file>.md` as a file in the repo. The orchestrator does not intercept commands it wasn't invoked through.
@@ -66,3 +99,5 @@ This means:
 - The spec content will be in the repo, not in Tusk.
 - Future agents reading Tusk for context won't find this spec.
 - If you want it in Tusk later, copy it manually into a note via `tusk_note_add` and archive or delete the file.
+
+If you mutate a node's description directly via `tusk_task_modify` to change its scope (instead of running `/wbs-reshape`), the prior reasoning is lost — there's no audit note bridging the old and new shape. The orchestrator does not detect this after the fact. Convention: scope changes that invalidate prior assumptions go through `/wbs-reshape`; trivial typo-fixes and phrasing edits do not.
