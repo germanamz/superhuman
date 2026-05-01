@@ -65,4 +65,4 @@ This means:
 
 - The spec content will be in the repo, not in Tusk.
 - Future agents reading Tusk for context won't find this spec.
-- If you want it in Tusk later, copy it manually into a note via `tusk_note_create` and archive or delete the file.
+- If you want it in Tusk later, copy it manually into a note via `tusk_note_add` and archive or delete the file.

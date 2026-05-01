@@ -14,7 +14,7 @@ Render the WBS subtree from the given node (or from the project root if none) wi
 
 ## Procedure
 
-1. **Resolve the target project and node.** If `project=<name>` was passed, use that project — confirm it exists via `tusk_project_get`, hard error if not. Otherwise, fall back to context resolution. Then resolve the node from the explicit task-id, or the orchestrator's current-task context, or the project root.
+1. **Resolve the target project and node.** If `project=<name>` was passed, look it up via `tusk_project_list` and filter for the named project. Hard error if it isn't returned. Otherwise, fall back to context resolution. Then resolve the node from the explicit task-id, or the orchestrator's current-task context, or the project root.
 
 2. **Fetch the subtree.** Call Tusk MCP — `tusk_task_tree` for the structure and `tusk_task_summary` (or `tusk task tree --rollup` via shell) for `%done` rollup from descendants.
 

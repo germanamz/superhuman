@@ -21,7 +21,7 @@ Do **not** invoke for tasks in projects with no WBS taxonomy, or for non-Tusk fi
 
 ### 1. Detect Tusk context
 
-- If the invoking command passed an explicit `project=<name>` argument, use that project — confirm it exists via `tusk_project_get`, hard error if not. Otherwise, call `tusk_project_get` (or `tusk_project_list`) to identify the active project.
+- If the invoking command passed an explicit `project=<name>` argument, look it up via `tusk_project_list` and filter for the named project. Hard error if it isn't returned. Otherwise call `tusk_project_list` to identify the active project (filter by current context, or ask the user if multiple projects exist).
 - Hard error if Tusk MCP is unreachable. Point at `templates/wbs/taxonomy.md` for setup.
 - Hard error if the project has no taxonomy. Surface the recommended taxonomy from `templates/wbs/taxonomy.md` and offer to apply it (workspace-wide or per-project).
 
@@ -65,9 +65,9 @@ When brainstorming a node:
    - The directive that the brainstorm output must land as a Tusk note (`meta.type=brainstorm` or `meta.type=spec`), not as `docs/superpowers/specs/<file>.md`.
 2. Let brainstorming run its normal loop (one question at a time, propose 2–3 approaches, present design sections).
 3. At brainstorming's "Write design doc" terminal step, capture the spec content. Choose the wrapping mechanism:
-   - **Subagent capture (preferred):** invoke brainstorming as a subagent with instructions to return the final spec content as text rather than write it to disk; the orchestrator then posts it via `tusk_note_create`.
-   - **Context-shim:** instruct the brainstorming skill in its initial context that the "Write design doc" step must call `tusk_note_create` with the right meta — viable if brainstorming is flexible enough to honor the override.
-   - **Post-write hoist:** let brainstorming write the file, then read it, post via `tusk_note_create`, and delete the file. Last resort.
+   - **Subagent capture (preferred):** invoke brainstorming as a subagent with instructions to return the final spec content as text rather than write it to disk; the orchestrator then posts it via `tusk_note_add`.
+   - **Context-shim:** instruct the brainstorming skill in its initial context that the "Write design doc" step must call `tusk_note_add` with the right meta — viable if brainstorming is flexible enough to honor the override.
+   - **Post-write hoist:** let brainstorming write the file, then read it, post via `tusk_note_add`, and delete the file. Last resort.
 4. Update the node's description: populate the Karpathy fields with summaries from the spec, leaving deep rationale in the note. Use `tusk_task_modify` with `description=<populated-template>` and a fresh `version`.
 5. The brainstorming skill's spec self-review and user-review gates still run, reading from the Tusk note.
 6. When brainstorming's terminal step would invoke `writing-plans`, wrap that the same way (see step 6).
@@ -77,10 +77,10 @@ When brainstorming a node:
 When planning a Story's implementation:
 
 1. Invoke the `writing-plans` skill via the Skill tool, with a context shim describing:
-   - The current Story's spec note (pulled via `tusk_note_get`).
+   - The current Story's spec note (pulled via `tusk_note_list task=<story-id> meta.type=spec`, take the newest non-archived).
    - The directive that the plan output must land as a Tusk note (`meta.type=plan`), not as `docs/superpowers/plans/<file>.md`.
 2. Let writing-plans produce the plan content.
-3. Post the plan via `tusk_note_create` with `task=<story-id>, meta.type=plan, body=<plan-content>`.
+3. Post the plan via `tusk_note_add` with `task=<story-id>, meta.type=plan, body=<plan-content>`.
 4. If the plan has phases (heavy phasing — multiple implementer subagents per Tusk task, sequential bridge-code dependencies, etc.), `superhuman:phase-planning-rules` auto-invokes; let it drive the per-phase note shape and the 4–6 task split. Per-phase notes land as `meta.type=phase-plan, meta.phase=phase-N` on the Story, following `templates/wbs/note-phase-plan-heavy.md`. After all phase-plan notes are drafted, `superhuman:phase-continuity-review` auto-invokes before any task is dispatched. After each phase's tasks are workflow-completed and after all phases ship, `superhuman:phase-post-implementation-review` auto-invokes for the per-phase gate and final sequence verification.
 5. Each task in the plan becomes a child Tusk task at `level=task` parented to the Story, tagged `+phase-N` if the plan is phased. Use `/wbs-new task` for each — do not bypass the command.
 

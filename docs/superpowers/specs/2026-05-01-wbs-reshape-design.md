@@ -75,7 +75,7 @@ The skill is auto-invoked by `wbs-orientation` when end-of-brainstorm, planning-
 
 7. **Disposition decisions per direct child.** For each direct child of the focal node, ask one of:
    - **Keep unchanged** — leave alone.
-   - **Reparent** — to a different existing parent or a newly-created one. Apply via `tusk_task_modify`. Then offer: *"Reshape this child now under its new parent?"* If yes → recurse into step 1 with this child as new focal node; if no → record deferred reshape as an `## Open Questions` entry on the child's description.
+   - **Reparent** — to a different existing parent or a newly-created one. Apply via `tusk_task_modify`. Then offer: *"Reshape this child now under its new parent?"* If yes → recurse into step 1 with this child as new focal node; if no → record deferred reshape as an `## Open Questions` entry on the child's description. Recursion depth from the top-level invocation is bounded — at depth > 3, the skill pauses and asks the user whether continued descent is intended.
    - **Archive** — apply archive semantics (Component 4). Children of the archived node are archived recursively unless explicitly reparented out first.
 
    Children currently in `in_progress` or `in_review` get a hard-confirm prompt before archive or reparent: *"Task #N is in flight — archiving/reparenting will disrupt that work. Confirm? (y/N)"* — default N, soft-mode skip not allowed.
@@ -316,7 +316,7 @@ Four operations are common:
 The existing step 5 has substeps 1–6 (substep 6 is "When brainstorming's terminal step would invoke `writing-plans`, wrap that the same way"). Append as new substep 7:
 
 ```markdown
-7. **End-of-brainstorm contradiction gate.** Before brainstorming posts the new `meta.type=spec` note via `tusk_note_create`, compare the proposed spec against the parent node's Karpathy fields (`Out of Scope`, `Success Criteria`). If the proposed spec contradicts the parent — for example, the new design needs a capability the parent's "Out of Scope" rules out — surface the contradiction with three choices:
+7. **End-of-brainstorm contradiction gate.** Before brainstorming posts the new `meta.type=spec` note via `tusk_note_add`, compare the proposed spec against the parent node's Karpathy fields (`Out of Scope`, `Success Criteria`). If the proposed spec contradicts the parent — for example, the new design needs a capability the parent's "Out of Scope" rules out — surface the contradiction with three choices:
 
    - **(1) Reshape the parent now (pause-and-resume).** Invoke `wbs-reshape` via the Skill tool with the parent as focal node. After it completes (or aborts), re-load the now-refreshed parent context and re-evaluate whether the in-flight spec for this child still makes sense.
    - **(2) Accept the deviation.** Post the spec as-is. Add an entry to the spec note's `## Open Questions` section: "Diverges from parent <parent-id> Out of Scope: <field>. Accepted on <YYYY-MM-DD> pending parent reshape." This becomes a forcing function for whoever later reshapes the parent.
