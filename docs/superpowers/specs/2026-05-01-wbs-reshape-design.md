@@ -313,10 +313,10 @@ Four operations are common:
 
 ### Change 2 — Step 5 ("Wrapped brainstorming"): add the end-of-brainstorm contradiction gate
 
-After the existing step 5.5 ("spec self-review and user-review gates still run"), add:
+The existing step 5 has substeps 1–6 (substep 6 is "When brainstorming's terminal step would invoke `writing-plans`, wrap that the same way"). Append as new substep 7:
 
 ```markdown
-6. **End-of-brainstorm contradiction gate.** Before brainstorming posts the new `meta.type=spec` note via `tusk_note_create`, compare the proposed spec against the parent node's Karpathy fields (`Out of Scope`, `Success Criteria`). If the proposed spec contradicts the parent — for example, the new design needs a capability the parent's "Out of Scope" rules out — surface the contradiction with three choices:
+7. **End-of-brainstorm contradiction gate.** Before brainstorming posts the new `meta.type=spec` note via `tusk_note_create`, compare the proposed spec against the parent node's Karpathy fields (`Out of Scope`, `Success Criteria`). If the proposed spec contradicts the parent — for example, the new design needs a capability the parent's "Out of Scope" rules out — surface the contradiction with three choices:
 
    - **(1) Reshape the parent now (pause-and-resume).** Invoke `wbs-reshape` via the Skill tool with the parent as focal node. After it completes (or aborts), re-load the now-refreshed parent context and re-evaluate whether the in-flight spec for this child still makes sense.
    - **(2) Accept the deviation.** Post the spec as-is. Add an entry to the spec note's `## Open Questions` section: "Diverges from parent <parent-id> Out of Scope: <field>. Accepted on <YYYY-MM-DD> pending parent reshape." This becomes a forcing function for whoever later reshapes the parent.
@@ -327,10 +327,10 @@ After the existing step 5.5 ("spec self-review and user-review gates still run")
 
 ### Change 3 — Step 6 ("Wrapped writing-plans"): add the planning-time gate
 
-After step 6.4 (phase-planning-rules description), add:
+The existing step 6 has substeps 1–5. Append as new substep 6:
 
 ```markdown
-6. **Planning-time contradiction gate.** Before posting the plan note, check whether the produced plan can fit the parent Initiative's stated decomposition. Specifically: does the plan require a phase, dependency, or scope element that contradicts the parent's `## Phasing`, `## Out of Scope`, or `## Tradeoffs Considered`? If so, surface the same three-choice prompt described in step 5.6, scoped to the parent of this Story's Initiative (or the nearest ancestor whose Karpathy fields are contradicted). Same defaults: user picks; never auto-decide.
+6. **Planning-time contradiction gate.** Before posting the plan note, check whether the produced plan can fit the parent Initiative's stated decomposition. Specifically: does the plan require a phase, dependency, or scope element that contradicts the parent's `## Phasing`, `## Out of Scope`, or `## Tradeoffs Considered`? If so, surface the same three-choice prompt described in step 5.7, scoped to the parent of this Story's Initiative (or the nearest ancestor whose Karpathy fields are contradicted). Same defaults: user picks; never auto-decide.
 ```
 
 ### Change 4 — Step 7 ("Karpathy decomposition gate"): add the gate-failure delegation
@@ -338,21 +338,21 @@ After step 6.4 (phase-planning-rules description), add:
 Append to existing step 7:
 
 ```markdown
-**Reshape escape hatch.** If the gate fails specifically because the node's design conflicts with a parent constraint (for example, the user can't write `## Success Criteria` without violating the parent's `## Out of Scope`), the right answer is reshape, not field-massaging. Surface the three-choice prompt from step 5.6, scoped to the parent. The user picks: reshape the parent, accept the deviation as a recorded divergence, or abandon and restart.
+**Reshape escape hatch.** If the gate fails specifically because the node's design conflicts with a parent constraint (for example, the user can't write `## Success Criteria` without violating the parent's `## Out of Scope`), the right answer is reshape, not field-massaging. Surface the three-choice prompt from step 5.7, scoped to the parent. The user picks: reshape the parent, accept the deviation as a recorded divergence, or abandon and restart.
 ```
 
 ### Change 5 — New step 5a: soft-mode reshape hints
 
-Inserted before step 5 wraps up.
+Inserted as a labeled subsection between steps 5 and 6 (so it's reachable from both wrapped brainstorming and wrapped writing-plans without renumbering existing steps 7–10):
 
 ```markdown
 ### 5a. Soft-mode reshape hints
 
-While running wrapped brainstorming or writing-plans, if user phrasing strongly suggests structural drift — phrases like "this contradicts X," "this is actually two stories," "we should split this," "this doesn't fit under <parent>" — emit a one-line hint, *not* a blocking prompt:
+While running wrapped brainstorming (step 5) or wrapped writing-plans (step 6), if user phrasing strongly suggests structural drift — phrases like "this contradicts X," "this is actually two stories," "we should split this," "this doesn't fit under <parent>" — emit a one-line hint, *not* a blocking prompt:
 
 > *"Sounds like the shape might need to change. If so, you can run `/wbs-reshape <task-id>` to drive that explicitly, or keep going and the end-of-brainstorm gate will check for contradictions automatically."*
 
-Emit at most once per brainstorm/plan invocation. Do not interrupt the flow. The hard gates in steps 5.6, 6.6, and 7 are the authoritative triggers.
+Emit at most once per brainstorm/plan invocation. Do not interrupt the flow. The hard gates in steps 5.7, 6.6, and 7 are the authoritative triggers.
 ```
 
 ### Change 6 — New step 11: Wrapped reshape
@@ -360,12 +360,12 @@ Emit at most once per brainstorm/plan invocation. Do not interrupt the flow. The
 ```markdown
 ### 11. Wrapped reshape
 
-When reshaping a node — explicit `/wbs-reshape` invocation, or one of the gate-driven offers from steps 5.6 / 6.6 / 7:
+When reshaping a node — explicit `/wbs-reshape` invocation, or one of the gate-driven offers from steps 5.7 / 6.6 / 7:
 
 1. Invoke the `superhuman:wbs-reshape` skill via the Skill tool, passing the focal node's short ID and (if the trigger surfaced one) the contradicting parent context.
 2. The reshape skill drives its own loop — context load, trigger capture, wrapped brainstorming, per-child disposition, mutation, audit note. See `plugins/superhuman/skills/wbs-reshape/SKILL.md`.
 3. When reshape completes, it returns a structured summary (focal node ID, new spec note ID, audit note ID, disposition list).
-4. **If reshape was invoked from step 5.6 or 6.6 (pause-and-resume)**: reload the now-refreshed parent context. Re-display the in-flight child spec or plan. Ask the user: "Parent context has been reshaped. Does the in-flight content for this child still make sense, or do you want to revise?" Revise → restart the child's wrapped brainstorming/writing-plans flow with refreshed context. Keep → proceed to commit.
+4. **If reshape was invoked from step 5.7 or 6.6 (pause-and-resume)**: reload the now-refreshed parent context. Re-display the in-flight child spec or plan. Ask the user: "Parent context has been reshaped. Does the in-flight content for this child still make sense, or do you want to revise?" Revise → restart the child's wrapped brainstorming/writing-plans flow with refreshed context. Keep → proceed to commit.
 5. **If reshape was invoked from step 7 (gate failure)**: re-run the Karpathy gate on the original child node. If it now passes, proceed with decomposition transition. If it still fails for an unrelated reason, surface that.
 6. **If reshape was invoked explicitly via `/wbs-reshape`**: control returns to the user. No automatic resume.
 ```
