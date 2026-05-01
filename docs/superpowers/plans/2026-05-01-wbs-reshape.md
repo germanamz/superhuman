@@ -4,7 +4,7 @@
 
 **Goal:** Ship `/wbs-reshape` — a command and matching skill that lets WBS authors change direction mid-flight by re-brainstorming a node with full context of its original reasoning, then archiving / reparenting / keeping descendants based on the new shape. Auto-invokes from `wbs-orientation` when end-of-brainstorm, planning-time, or decomposition-gate signals indicate contradiction with parent context.
 
-**Architecture:** One new SKILL.md (`wbs-reshape`), one new command (`/wbs-reshape`), one new audit-note template (`note-reshape.md`), targeted edits to `wbs-orientation/SKILL.md` and `templates/wbs/conventions.md`, plus a small companion section in `wbs-user-guide.md`. No new code path — the skill orchestrates Tusk MCP calls (`tusk_task_get`, `tusk_task_modify`, `tusk_note_create`, `tusk_note_archive`) and wraps the existing `brainstorming` skill.
+**Architecture:** One new SKILL.md (`wbs-reshape`), one new command (`/wbs-reshape`), one new audit-note template (`note-reshape.md`), targeted edits to `wbs-orientation/SKILL.md` and `templates/wbs/conventions.md`, plus a small companion section in `wbs-user-guide.md`. No new code path — the skill orchestrates Tusk MCP calls (`tusk_task_get`, `tusk_task_modify`, `tusk_note_add`, `tusk_note_archive`) and wraps the existing `brainstorming` skill.
 
 **Tech Stack:** Markdown with YAML frontmatter; the `superpowers:writing-skills` skill governs SKILL.md authoring; `jq` for marketplace-catalog validation; `head` / `grep` / `awk` for inline frontmatter checks; Tusk MCP for runtime workflow operations (no test runner — content artifacts plus manual end-to-end walkthrough).
 
@@ -167,7 +167,7 @@ Do **not** invoke for routine description edits, typo fixes, or phrasing changes
 
 ### 1. Detect Tusk context
 
-- If invoked with an explicit `project=<name>` argument, use that project — confirm it exists via `tusk_project_get`, hard error if not. Otherwise call `tusk_project_get` (or `tusk_project_list`) to identify the active project.
+- If invoked with an explicit `project=<name>` argument, look it up via `tusk_project_list` and filter for the named project. Hard error if it isn't returned. Otherwise call `tusk_project_list` to identify the active project (filter by current context, or ask the user if multiple projects exist).
 - Hard error if Tusk MCP is unreachable. Point at `templates/wbs/taxonomy.md` for setup.
 - Hard error if the project has no taxonomy. Surface the recommended taxonomy from `templates/wbs/taxonomy.md` and offer to apply it.
 - Hard error if the project's workflow has no terminal cancelled / won't-do status. Reshape archive semantics require it; surface the requirement and refuse to proceed until the workflow is updated.
@@ -229,7 +229,7 @@ Invoke the `brainstorming` skill via the Skill tool with a context shim describi
 - The level-appropriate description template (loaded from `templates/wbs/desc-<level>.md` based on the focal node's level — same loading rules as `wbs-orientation` step 3).
 - The directive that brainstorming's terminal "Write design doc" output must land as a *new* `meta.type=spec` Tusk note on the focal node, **not** as `docs/superpowers/specs/<file>.md`.
 
-Use the same wrapping mechanism documented in `wbs-orientation/SKILL.md` step 5 ("Subagent capture" preferred — invoke brainstorming as a subagent with instructions to return the final spec content as text rather than write it to disk; this orchestrator then posts it via `tusk_note_create` in step 8.2).
+Use the same wrapping mechanism documented in `wbs-orientation/SKILL.md` step 5 ("Subagent capture" preferred — invoke brainstorming as a subagent with instructions to return the final spec content as text rather than write it to disk; this orchestrator then posts it via `tusk_note_add` in step 8.2).
 
 Brainstorming runs its normal loop (one question at a time, propose 2–3 approaches, present design sections). The synthesis from step 4 is the input context, not a constraint — the user is free to move scope in any direction, including dramatic departures from the original.
 
@@ -241,8 +241,8 @@ For each direct child of the focal node (loaded in step 3), present the user wit
 
 - **Keep unchanged.** Leave the child alone. The new spec's children list still names this child.
 - **Reparent.** The child belongs under a different parent in the new shape. Ask which parent — an existing Tusk task or a new one. If new, run `/wbs-new <level> "<title>"` first to create it. Apply the move via `tusk_task_modify parent=<new-parent-id>` (the child's subtree comes along automatically — Tusk reparents the whole subtree). Then ask: *"Reshape this child now under its new parent?"*
-  - If **yes**: recurse into step 1 of this skill with the reparented child as the new focal node. The recursive run posts its own `meta.type=reshape` note; the parent reshape's audit note (this run's) lists the nested reshape note ID in its `## Nested Reshapes` section.
-  - If **no**: append a deferred-reshape entry to the child's description's `## Open Questions` section. Format: `Reshape under new parent <new-parent-id> context — deferred from reshape <will-be-this-note-short-id> on <YYYY-MM-DD>.` (The reshape note's short-id isn't known until step 8.5 — capture the deferral and patch the description either at step 8.4 with a placeholder followed by an update at 8.5, or post the note before applying the description update.)
+  - If **yes**: recurse into step 1 of this skill with the reparented child as the new focal node. The recursive run posts its own `meta.type=reshape` note; the parent reshape's audit note (this run's) lists the nested reshape note ID in its `## Nested Reshapes` section. If recursion depth from the top-level invocation exceeds 3, pause and confirm with the user that continued descent is intended — deeply-nested reshapes usually mean the wrong focal node was chosen at the top.
+  - If **no**: capture the deferral. Step 8.6 patches the child's `## Open Questions` section once the audit note's short-id is known. Do not edit the child's description in step 7. The patch format applied at step 8.6 is: `Reshape under new parent <new-parent-id> context — deferred from reshape <audit-note-short-id> on <YYYY-MM-DD>.`
 - **Archive.** The child no longer fits the new shape. Apply archive semantics (see "Archive semantics" below). Children of the archived child are archived recursively unless they have already been explicitly reparented out earlier in this loop.
 
 For children currently in `in_progress` or `in_review` (from step 3's concurrency-watch list), issue a hard-confirm prompt before archive or reparent:
@@ -260,10 +260,10 @@ Apply in this exact order. Each step is a single Tusk MCP call (or a small bound
 1. **Archive prior notes on the focal node.** For each non-archived `meta.type=spec | plan | brainstorm` note on the focal node, call `tusk_note_archive <note-short-id>`.
 2. **Post the new `meta.type=spec` note** on the focal node, using the brainstorming output from step 6. Set `task=<focal-id>, meta.type=spec, body=<new-spec-content>`. Capture the returned note short-id for use in the audit note's references.
 3. **Update the focal node's description** via `tusk_task_modify task=<focal-id> description=<new-description> version=<current-version>`. The new description has Karpathy fields populated from the new spec (paraphrased — the spec is the authoritative version, the description is the lean-ticket reference per `templates/wbs/conventions.md`). The `## <Children>` section is rebuilt from step 7's dispositions.
-4. **Apply each child disposition.** For each direct child:
+4. **Apply each child disposition.** For each direct child, in the order surfaced in step 7:
    - **Keep unchanged**: no-op.
-   - **Reparent**: `tusk_task_modify task=<child-id> parent=<new-parent-id> version=<child-version>`. If the user elected to recurse, the recursive `wbs-reshape` invocation runs *here*, before continuing the loop — its mutations land before this run's step 8.5 fires.
-   - **Reparent without recursion**: append the deferred-reshape entry to the child's description and apply the modify (description + parent in one call if MCP supports it; otherwise two calls — modify parent, then modify description).
+   - **Reparent (with recursion)**: `tusk_task_modify task=<child-id> parent=<new-parent-id> version=<child-version>`. The recursive `wbs-reshape` invocation runs immediately after the modify call returns, before processing the next child. Its mutations land in this run's step 8 ordering and its own audit note posts as part of the recursive run; the parent-reshape note (this run's) is created in substep 5 and lists the recursive run's audit-note ID in its `## Nested Reshapes` section.
+   - **Reparent (without recursion)**: `tusk_task_modify task=<child-id> parent=<new-parent-id> version=<child-version>`. Do not modify the child's description here — the deferred-reshape entry on `## Open Questions` is patched in substep 6, once the audit note's short-id is known.
    - **Archive**: see "Archive semantics" below for the four-step procedure.
 5. **Post the `meta.type=reshape` audit note** on the focal node, using `templates/wbs/note-reshape.md` as the body shape. Set:
    - `task=<focal-id>`
@@ -271,7 +271,9 @@ Apply in this exact order. Each step is a single Tusk MCP call (or a small bound
    - `meta.reshape-of-spec=<prior-spec-short-id>` (from step 3's loaded prior spec)
    - `meta.parent-reshape=<parent-reshape-short-id>` if this is a recursive run (the parent reshape's note ID is passed in via the recursion call)
    - `body=<populated-template>` — fill every section. Reasoning and Invalidated Assumptions must be the verbatim user input from step 5; do not paraphrase.
-6. **Patch deferred-reshape entries** with the audit note's actual short-id if step 7 used a placeholder. (Skip if the description was already posted with the final note ID — depends on whether step 8.4 or step 8.5 ran first; the sequencing here is forced by the note ID dependency.)
+
+   Capture the returned audit-note short-id for substep 6.
+6. **Patch deferred-reshape entries.** For each child marked "reparent without recursion" in substep 4, append a deferred-reshape entry to the child's `## Open Questions` section using the audit-note short-id from substep 5. Format: `Reshape under new parent <new-parent-id> context — deferred from reshape <audit-note-short-id> on <YYYY-MM-DD>.` Apply via `tusk_task_modify task=<child-id> description=<updated-description> version=<child-version>`. If no children are marked "reparent without recursion," substep 6 is a no-op.
 
 If a `tusk_task_modify` call returns an optimistic-lock (version conflict) error, catch it. Re-fetch the affected task. Ask the user how to proceed: retry, manually merge, or abort the reshape. Never auto-merge.
 
@@ -412,7 +414,7 @@ This is the explicit entry point. The same skill is also auto-invoked by `wbs-or
 
 ## Procedure
 
-1. **Resolve the target Tusk Project.** If `project=<name>` was passed, use that — confirm it exists via `tusk_project_get`, hard error if not. Otherwise call `tusk_project_list` / `tusk_project_get` to determine the active project. If multiple projects exist and none is implied by context, ask the user which one.
+1. **Resolve the target Tusk Project.** If `project=<name>` was passed, look it up via `tusk_project_list` and filter for the named project. Hard error if it isn't returned. Otherwise call `tusk_project_list` to determine the active project. If multiple projects exist and none is implied by context, ask the user which one.
 
 2. **Resolve the focal node.** If `[task-id]` was passed, use it directly. Otherwise pass through to the skill — its step 2 handles fall-back resolution (most-recently-inspected task, then user prompt).
 
@@ -544,7 +546,7 @@ The two changes vs. the existing list: the `meta.type=` line now includes `resha
 
 - [ ] **Step 4: Append a paragraph to "Bypass consequences"**
 
-After the existing final paragraph of the "Bypass consequences" section (which currently ends "...copy it manually into a note via `tusk_note_create` and archive or delete the file."), append:
+After the existing final paragraph of the "Bypass consequences" section (which currently ends "...copy it manually into a note via `tusk_note_add` and archive or delete the file."), append:
 
 ```markdown
 
@@ -653,7 +655,7 @@ In the existing step-5 body, the substeps end with:
 Append a new substep 7 immediately after substep 6, before the section ends (i.e., before the `### 6. Wrapped writing-plans` heading or any blank line that precedes it):
 
 ```
-7. **End-of-brainstorm contradiction gate.** Before brainstorming posts the new `meta.type=spec` note via `tusk_note_create`, compare the proposed spec against the parent node's Karpathy fields (`Out of Scope`, `Success Criteria`). If the proposed spec contradicts the parent — for example, the new design needs a capability the parent's "Out of Scope" rules out — surface the contradiction with three choices:
+7. **End-of-brainstorm contradiction gate.** Before brainstorming posts the new `meta.type=spec` note via `tusk_note_add`, compare the proposed spec against the parent node's Karpathy fields (`Out of Scope`, `Success Criteria`). If the proposed spec contradicts the parent — for example, the new design needs a capability the parent's "Out of Scope" rules out — surface the contradiction with three choices:
 
    - **(1) Reshape the parent now (pause-and-resume).** Invoke `superhuman:wbs-reshape` via the Skill tool with the parent as focal node. After it completes (or aborts), re-load the now-refreshed parent context and re-evaluate whether the in-flight spec for this child still makes sense.
    - **(2) Accept the deviation.** Post the spec as-is. Add an entry to the spec note's `## Open Questions` section: "Diverges from parent <parent-id> Out of Scope: <field>. Accepted on <YYYY-MM-DD> pending parent reshape." This becomes a forcing function for whoever later reshapes the parent.
@@ -971,7 +973,7 @@ This task drives one full reshape end-to-end, exercising the explicit-invocation
 
 - [ ] **Step 1: Set up a fresh test branch in a Tusk Project with WBS taxonomy**
 
-Per `plugins/superhuman/templates/wbs/taxonomy.md`. Confirm `tusk_project_get` returns a project with `[[milestone], [initiative], [story], [task, spike]]` ranks. Confirm the project's workflow includes a terminal cancelled / won't-do status (reshape requires this).
+Per `plugins/superhuman/templates/wbs/taxonomy.md`. Confirm `tusk_project_list` returns a project with `[[milestone], [initiative], [story], [task, spike]]` ranks. Confirm the project's workflow includes a terminal cancelled / won't-do status (reshape requires this).
 
 - [ ] **Step 2: Build a small WBS subtree to reshape**
 
@@ -1100,6 +1102,6 @@ git commit -m "Mark WBS reshape sub-project as Done in roadmap"
 - **Tasks 1–3 could be dispatched to separate subagents in parallel** if the dispatcher accepts the dependency: subagent 1 produces the template, subagent 2 produces the skill (does not actually need to read the template at author-time — it only references the path), subagent 3 produces the command. The static verification in Task 7 then catches any drift. For lowest risk, run sequentially.
 - **Tasks 7 is automated, runnable by the implementer subagent.** Tasks 8–9 are manual — they require human action in Claude Code (Task 8) and a Tusk MCP environment driving an end-to-end reshape (Task 9).
 - **Task 10** is the bookkeeping step; run after Tasks 8 and 9 confirm the implementation works end-to-end.
-- **Tusk MCP verb names** (`tusk_task_get`, `tusk_task_modify`, `tusk_note_create`, `tusk_note_archive`, `tusk_note_list`, `tusk_workflow_list`, etc.) are referenced by intent throughout. If the live Tusk MCP exposes different exact names at implementation time, substitute accordingly — the skill prose names operations conceptually.
+- **Tusk MCP verb names** (`tusk_task_get`, `tusk_task_modify`, `tusk_note_add`, `tusk_note_archive`, `tusk_note_list`, `tusk_workflow_list`, etc.) are referenced by intent throughout. If the live Tusk MCP exposes different exact names at implementation time, substitute accordingly — the skill prose names operations conceptually.
 - **Workflow status assumption.** The skill assumes the project workflow has a terminal cancelled / won't-do status. If a project the user wants to reshape lacks one, the skill errors early in step 1 and the user must update the workflow first via `tusk_workflow_modify`. This is a deliberate hard-block, not a soft fallback.
 - **No backwards-compatibility hacks.** This is a new feature; there is nothing to migrate. If the reshape skill is invoked against a project that has no spec notes (older nodes built before the spine), the audit note's `## Original Shape` section is sparse and the skill warns about it but proceeds.

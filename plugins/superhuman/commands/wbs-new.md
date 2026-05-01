@@ -15,7 +15,7 @@ Create a new WBS node — a Tusk task — at the given level under the current p
 
 ## Procedure
 
-1. **Resolve the target Tusk Project.** If `project=<name>` was passed, use that — confirm it exists via `tusk_project_get`, hard error if not. Otherwise, fall back to context: call `tusk_project_list` / `tusk_project_get` to determine the active project, and if multiple projects exist and none is implied by context, ask the user which one.
+1. **Resolve the target Tusk Project.** If `project=<name>` was passed, look it up via `tusk_project_list` and filter for the named project. Hard error if it isn't returned. Otherwise, fall back to context: call `tusk_project_list` to determine the active project, and if multiple projects exist and none is implied by context, ask the user which one.
 
 2. **Validate the level against the project's taxonomy.** Call `tusk_project_settings_get` (or equivalent) to fetch the taxonomy. Confirm `<level>` appears in the rank list. If the project has no WBS taxonomy, surface a hard error pointing at `templates/wbs/taxonomy.md`.
 

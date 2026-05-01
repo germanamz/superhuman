@@ -199,7 +199,7 @@ Keep descriptions appropriate to their level:
 
 The orchestrator warns when an upper-level description exceeds 250 words ("move detail into a note") and when a Task description lacks file/line references. Warnings inform; they don't block.
 
-The discipline: lean tickets, rich notes. An implementer should be able to read a Task description and act, pulling notes via `tusk_note_get` only when they need rationale.
+The discipline: lean tickets, rich notes. An implementer should be able to read a Task description and act, pulling notes via `tusk_note_list` only when they need rationale.
 
 ---
 
@@ -219,7 +219,7 @@ Allowed. Tusk permits any-ancestor-to-any-descendant parenting (a Milestone can 
 
 ### "I ran /brainstorm directly, not through the orchestrator"
 
-That's fine — but the spec writes to `docs/superpowers/specs/<file>.md`, **not** to a Tusk note. Future agents reading Tusk for context won't find it. If you want it in Tusk afterwards, copy it into a note via `tusk_note_create` and archive the file.
+That's fine — but the spec writes to `docs/superpowers/specs/<file>.md`, **not** to a Tusk note. Future agents reading Tusk for context won't find it. If you want it in Tusk afterwards, copy it into a note via `tusk_note_add` and archive the file.
 
 ### "I reparented a task and now phases look weird"
 

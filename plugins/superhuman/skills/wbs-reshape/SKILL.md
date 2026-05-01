@@ -23,7 +23,7 @@ Do **not** invoke for routine description edits, typo fixes, or phrasing changes
 
 ### 1. Detect Tusk context
 
-- If invoked with an explicit `project=<name>` argument, use that project — confirm it exists via `tusk_project_get`, hard error if not. Otherwise call `tusk_project_get` (or `tusk_project_list`) to identify the active project.
+- If invoked with an explicit `project=<name>` argument, look it up via `tusk_project_list` and filter for the named project. Hard error if it isn't returned. Otherwise call `tusk_project_list` to identify the active project (filter by current context, or ask the user if multiple projects exist).
 - Hard error if Tusk MCP is unreachable. Point at `templates/wbs/taxonomy.md` for setup.
 - Hard error if the project has no taxonomy. Surface the recommended taxonomy from `templates/wbs/taxonomy.md` and offer to apply it.
 - Hard error if the project's workflow has no terminal cancelled / won't-do status. Reshape archive semantics require it; surface the requirement and refuse to proceed until the workflow is updated.
@@ -85,7 +85,7 @@ Invoke the `brainstorming` skill via the Skill tool with a context shim describi
 - The level-appropriate description template (loaded from `templates/wbs/desc-<level>.md` based on the focal node's level — same loading rules as `wbs-orientation` step 3).
 - The directive that brainstorming's terminal "Write design doc" output must land as a *new* `meta.type=spec` Tusk note on the focal node, **not** as `docs/superpowers/specs/<file>.md`.
 
-Use the same wrapping mechanism documented in `wbs-orientation/SKILL.md` step 5 ("Subagent capture" preferred — invoke brainstorming as a subagent with instructions to return the final spec content as text rather than write it to disk; this orchestrator then posts it via `tusk_note_create` in step 8.2).
+Use the same wrapping mechanism documented in `wbs-orientation/SKILL.md` step 5 ("Subagent capture" preferred — invoke brainstorming as a subagent with instructions to return the final spec content as text rather than write it to disk; this orchestrator then posts it via `tusk_note_add` in step 8.2).
 
 Brainstorming runs its normal loop (one question at a time, propose 2–3 approaches, present design sections). The synthesis from step 4 is the input context, not a constraint — the user is free to move scope in any direction, including dramatic departures from the original.
 
@@ -97,8 +97,8 @@ For each direct child of the focal node (loaded in step 3), present the user wit
 
 - **Keep unchanged.** Leave the child alone. The new spec's children list still names this child.
 - **Reparent.** The child belongs under a different parent in the new shape. Ask which parent — an existing Tusk task or a new one. If new, run `/wbs-new <level> "<title>"` first to create it. Apply the move via `tusk_task_modify parent=<new-parent-id>` (the child's subtree comes along automatically — Tusk reparents the whole subtree). Then ask: *"Reshape this child now under its new parent?"*
-  - If **yes**: recurse into step 1 of this skill with the reparented child as the new focal node. The recursive run posts its own `meta.type=reshape` note; the parent reshape's audit note (this run's) lists the nested reshape note ID in its `## Nested Reshapes` section.
-  - If **no**: append a deferred-reshape entry to the child's description's `## Open Questions` section. Format: `Reshape under new parent <new-parent-id> context — deferred from reshape <will-be-this-note-short-id> on <YYYY-MM-DD>.` (The reshape note's short-id isn't known until step 8.5 — capture the deferral and patch the description either at step 8.4 with a placeholder followed by an update at 8.5, or post the note before applying the description update.)
+  - If **yes**: recurse into step 1 of this skill with the reparented child as the new focal node. The recursive run posts its own `meta.type=reshape` note; the parent reshape's audit note (this run's) lists the nested reshape note ID in its `## Nested Reshapes` section. If recursion depth from the top-level invocation exceeds 3, pause and confirm with the user that continued descent is intended — deeply-nested reshapes usually mean the wrong focal node was chosen at the top.
+  - If **no**: capture the deferral. Step 8.6 patches the child's `## Open Questions` section once the audit note's short-id is known. Do not edit the child's description in step 7. The patch format applied at step 8.6 is: `Reshape under new parent <new-parent-id> context — deferred from reshape <audit-note-short-id> on <YYYY-MM-DD>.`
 - **Archive.** The child no longer fits the new shape. Apply archive semantics (see "Archive semantics" below). Children of the archived child are archived recursively unless they have already been explicitly reparented out earlier in this loop.
 
 For children currently in `in_progress` or `in_review` (from step 3's concurrency-watch list), issue a hard-confirm prompt before archive or reparent:
@@ -116,10 +116,10 @@ Apply in this exact order. Each step is a single Tusk MCP call (or a small bound
 1. **Archive prior notes on the focal node.** For each non-archived `meta.type=spec | plan | brainstorm` note on the focal node, call `tusk_note_archive <note-short-id>`.
 2. **Post the new `meta.type=spec` note** on the focal node, using the brainstorming output from step 6. Set `task=<focal-id>, meta.type=spec, body=<new-spec-content>`. Capture the returned note short-id for use in the audit note's references.
 3. **Update the focal node's description** via `tusk_task_modify task=<focal-id> description=<new-description> version=<current-version>`. The new description has Karpathy fields populated from the new spec (paraphrased — the spec is the authoritative version, the description is the lean-ticket reference per `templates/wbs/conventions.md`). The `## <Children>` section is rebuilt from step 7's dispositions.
-4. **Apply each child disposition.** For each direct child:
+4. **Apply each child disposition.** For each direct child, in the order surfaced in step 7:
    - **Keep unchanged**: no-op.
-   - **Reparent**: `tusk_task_modify task=<child-id> parent=<new-parent-id> version=<child-version>`. If the user elected to recurse, the recursive `wbs-reshape` invocation runs *here*, before continuing the loop — its mutations land before this run's step 8.5 fires.
-   - **Reparent without recursion**: append the deferred-reshape entry to the child's description and apply the modify (description + parent in one call if MCP supports it; otherwise two calls — modify parent, then modify description).
+   - **Reparent (with recursion)**: `tusk_task_modify task=<child-id> parent=<new-parent-id> version=<child-version>`. The recursive `wbs-reshape` invocation runs immediately after the modify call returns, before processing the next child. Its mutations land in this run's step 8 ordering and its own audit note posts as part of the recursive run; the parent-reshape note (this run's) is created in substep 5 and lists the recursive run's audit-note ID in its `## Nested Reshapes` section.
+   - **Reparent (without recursion)**: `tusk_task_modify task=<child-id> parent=<new-parent-id> version=<child-version>`. Do not modify the child's description here — the deferred-reshape entry on `## Open Questions` is patched in substep 6, once the audit note's short-id is known.
    - **Archive**: see "Archive semantics" below for the four-step procedure.
 5. **Post the `meta.type=reshape` audit note** on the focal node, using `templates/wbs/note-reshape.md` as the body shape. Set:
    - `task=<focal-id>`
@@ -127,7 +127,9 @@ Apply in this exact order. Each step is a single Tusk MCP call (or a small bound
    - `meta.reshape-of-spec=<prior-spec-short-id>` (from step 3's loaded prior spec)
    - `meta.parent-reshape=<parent-reshape-short-id>` if this is a recursive run (the parent reshape's note ID is passed in via the recursion call)
    - `body=<populated-template>` — fill every section. Reasoning and Invalidated Assumptions must be the verbatim user input from step 5; do not paraphrase.
-6. **Patch deferred-reshape entries** with the audit note's actual short-id if step 7 used a placeholder. (Skip if the description was already posted with the final note ID — depends on whether step 8.4 or step 8.5 ran first; the sequencing here is forced by the note ID dependency.)
+
+   Capture the returned audit-note short-id for substep 6.
+6. **Patch deferred-reshape entries.** For each child marked "reparent without recursion" in substep 4, append a deferred-reshape entry to the child's `## Open Questions` section using the audit-note short-id from substep 5. Format: `Reshape under new parent <new-parent-id> context — deferred from reshape <audit-note-short-id> on <YYYY-MM-DD>.` Apply via `tusk_task_modify task=<child-id> description=<updated-description> version=<child-version>`. If no children are marked "reparent without recursion," substep 6 is a no-op.
 
 If a `tusk_task_modify` call returns an optimistic-lock (version conflict) error, catch it. Re-fetch the affected task. Ask the user how to proceed: retry, manually merge, or abort the reshape. Never auto-merge.
 
