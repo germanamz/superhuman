@@ -21,6 +21,7 @@ Numbered for reference, not strict execution order. Order is reviewed each time 
 | 5 | **Windowed note-taking** — capture learnings into Tusk so future agents can pull narrow, relevant context without flooding the window | Not started | — | — |
 | 6 | **Code quality conventions** — a skill (or guide) that codifies the user's standards for code quality | Not started | — | — |
 | 7 | **Software architecture conventions** — a skill (or guide) that codifies the user's standards for architecture | Not started | — | — |
+| 8 | **WBS reshape** — `/wbs-reshape` command + `wbs-reshape` skill that lets WBS authors change direction mid-flight via context-aware re-brainstorm; auto-invokes from `wbs-orientation` on contradiction gates | Done | [2026-05-01 spec](specs/2026-05-01-wbs-reshape-design.md) | [2026-05-01 plan](plans/2026-05-01-wbs-reshape.md) |
 
 Sub-project #1 also ships a human-facing [user guide](wbs-user-guide.md) covering setup, the five levels, the daily decomposition flow, the slash commands, the Karpathy gate, and phasing.
 
