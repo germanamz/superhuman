@@ -15,7 +15,7 @@ Numbered for reference, not strict execution order. Order is reviewed each time 
 | # | Sub-project | Status | Spec | Plan |
 |---|---|---|---|---|
 | 1 | **WBS spine** — the inverted-flame decomposition model, the skill set that walks a user from wide scope to narrow scope, and the data shape of a "node" at each level | Done | [2026-04-29 spec](specs/2026-04-29-superhuman-wbs-spine-design.md) | [2026-04-29 plan](plans/2026-04-29-superhuman-wbs-spine.md) |
-| 2 | **Phase skills relocation + polish** — move the three phase skills (`phase-planning-rules`, `phase-continuity-review`, `phase-post-implementation-review`) from `~/.claude/skills/` into the `superhuman` plugin, reshape for WBS context | Not started | — | — |
+| 2 | **Phase skills relocation + polish** — move the three phase skills (`phase-planning-rules`, `phase-continuity-review`, `phase-post-implementation-review`) from `~/.claude/skills/` into the `superhuman` plugin, reshape for WBS context | Done | [2026-04-30 spec](specs/2026-04-30-phase-skills-relocation-design.md) | [2026-04-30 plan](plans/2026-04-30-phase-skills-relocation.md) |
 | 3 | **Tusk integration** — commands, agents, and conventions for syncing WBS nodes to [Tusk](https://github.com/germanamz/tusk) for task management | Not started | — | — |
 | 4 | **Implementation pipelines** — agent-orchestrated and human-orchestrated execution patterns per task, building on the existing phase implementer model | Not started | — | — |
 | 5 | **Windowed note-taking** — capture learnings into Tusk so future agents can pull narrow, relevant context without flooding the window | Not started | — | — |
