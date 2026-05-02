@@ -3,13 +3,13 @@
   "release-type": "node",
   "include-component-in-tag": true,
   "separate-pull-requests": true,
-  "pull-request-title-pattern": "chore(${componentNoSpace}): release ${version}",
   "bootstrap-sha": "2ada5e786ac01d6becc03948e3715b85017007ee",
   "packages": {
     ".": {
       "component": "marketplace",
       "package-name": "superhuman-marketplace",
       "changelog-path": "CHANGELOG.md",
+      "pull-request-title-pattern": "chore(marketplace): release ${version}",
       "exclude-paths": [
         "plugins"
       ],
@@ -25,6 +25,7 @@
       "component": "superhuman",
       "package-name": "superhuman",
       "changelog-path": "CHANGELOG.md",
+      "pull-request-title-pattern": "chore(superhuman): release ${version}",
       "extra-files": [
         {
           "type": "json",
