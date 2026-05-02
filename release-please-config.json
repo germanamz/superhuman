@@ -27,12 +27,12 @@
       "extra-files": [
         {
           "type": "json",
-          "path": "plugins/superhuman/.claude-plugin/plugin.json",
+          "path": ".claude-plugin/plugin.json",
           "jsonpath": "$.version"
         },
         {
           "type": "json",
-          "path": ".claude-plugin/marketplace.json",
+          "path": "/.claude-plugin/marketplace.json",
           "jsonpath": "$.plugins[?(@.name==\"superhuman\")].version"
         }
       ]

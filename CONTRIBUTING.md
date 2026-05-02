@@ -131,17 +131,19 @@ To onboard a new plugin called `<new>`:
      "extra-files": [
        {
          "type": "json",
-         "path": "plugins/<new>/.claude-plugin/plugin.json",
+         "path": ".claude-plugin/plugin.json",
          "jsonpath": "$.version"
        },
        {
          "type": "json",
-         "path": ".claude-plugin/marketplace.json",
+         "path": "/.claude-plugin/marketplace.json",
          "jsonpath": "$.plugins[?(@.name==\"<new>\")].version"
        }
      ]
    }
    ```
+
+   `extra-files` paths are resolved relative to the package directory unless they begin with `/`. The plugin's own `plugin.json` is package-relative; the shared marketplace catalog at the repo root must be written as `/.claude-plugin/marketplace.json` so release-please reaches it from outside the package.
 6. Seed `.release-please-manifest.json` with `"plugins/<new>": "0.0.0"`.
 7. Add `<new>` to the `scope-enum` list in `commitlint.config.mjs` and to the `scopes` list in `.github/workflows/lint-pr-title.yml` so the new scope is accepted by both lint layers.
 8. Open **two squash-merge PRs** in sequence (one per scope, since squash merge yields one commit per PR):
