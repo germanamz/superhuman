@@ -92,6 +92,21 @@ This repo uses **squash merging**. Under squash merge, the PR's title becomes th
 
 ## Release flow
 
+### Required secrets
+
+The `release-please` workflow authenticates as a GitHub App rather than the default `GITHUB_TOKEN`. This is what makes the lint workflows fire on the release PRs that release-please opens — PRs created with `GITHUB_TOKEN` cannot trigger other workflows (a GitHub Actions safety rule), so without an App token the required `lint-commits` and `lint-pr-title` checks never run on release PRs and branch protection blocks the merge.
+
+The repo therefore needs two Actions secrets:
+
+| Secret | Source |
+|---|---|
+| `RELEASE_PLEASE_APP_ID` | Numeric ID of the GitHub App, shown on the App's settings page. |
+| `RELEASE_PLEASE_APP_PRIVATE_KEY` | Full contents of the `.pem` file generated under "Private keys" on the App's settings page (including the `-----BEGIN/END-----` lines). |
+
+The App must be installed on this repo with **Contents: read & write**, **Pull requests: read & write**, and **Issues: read & write** permissions. If the App is rotated or replaced, regenerate both secrets.
+
+### Trigger flow
+
 1. Push conventional commits to `main` (typically via squash-merged PRs whose titles follow the format above).
 2. The `.github/workflows/release-please.yml` workflow runs on every push to `main`.
 3. For each component with unreleased changes, release-please opens (or updates) a release PR. The PR contains:
