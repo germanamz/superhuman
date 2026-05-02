@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "node",
+  "include-component-in-tag": true,
+  "separate-pull-requests": true,
+  "bootstrap-sha": "2ada5e786ac01d6becc03948e3715b85017007ee",
+  "packages": {
+    ".": {
+      "component": "marketplace",
+      "package-name": "superhuman-marketplace",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": ".claude-plugin/marketplace.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    },
+    "plugins/superhuman": {
+      "component": "superhuman",
+      "package-name": "superhuman",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "plugins/superhuman/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": ".claude-plugin/marketplace.json",
+          "jsonpath": "$.plugins[?(@.name==\"superhuman\")].version"
+        }
+      ]
+    }
+  }
+}
