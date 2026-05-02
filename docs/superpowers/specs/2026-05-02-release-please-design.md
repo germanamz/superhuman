@@ -182,7 +182,9 @@ Format: `<type>(<scope>): <subject>` where `<scope>` is a component name from `r
 | `chore(<scope>): ...`, `docs(<scope>): ...`, `refactor(<scope>): ...`, `test(<scope>): ...`, `ci(<scope>): ...`, `build(<scope>): ...`, `perf(<scope>): ...` | no bump; appears in changelog under its section if release-please's defaults include it |
 | Any commit with no scope, or a scope that does not match a registered component | no bump for any component; not attributed to a release |
 
-A commit's scope routes it to exactly one component. release-please does not dual-route a single commit. When a change affects both a plugin and the marketplace catalog (e.g. registering a new plugin), use **two commits** — one per scope.
+A commit's scope routes it to exactly one component. release-please does not dual-route a single commit. The repo uses **squash merge**, so one PR collapses to one commit on `main` and the PR title becomes that commit's subject — meaning a single PR can also only carry a single scope. When a change affects both a plugin and the marketplace catalog (e.g. registering a new plugin), split the work across **two PRs** — one per scope.
+
+**PR titles must follow Conventional Commits** with the same `<type>(<scope>): <subject>` format as commits, because the squashed merge commit on `main` inherits the PR title verbatim.
 
 **When to use `marketplace` scope:**
 - Adding a new plugin to the catalog (`feat(marketplace): register <new> plugin`)
@@ -208,10 +210,10 @@ Lives at the repo root. Contents:
    4. Add the marketplace entry in `.claude-plugin/marketplace.json#plugins[]` including `"version": "0.0.0"`.
    5. Register a `packages` entry in `release-please-config.json` keyed at `plugins/<new>` with `component`, `package-name`, and the two `extra-files` (plugin.json + filtered marketplace.json jsonpath using the new plugin's name).
    6. Seed `.release-please-manifest.json` with `"plugins/<new>": "0.0.0"`.
-   7. Make **two commits** on a feature branch:
-      - `feat(<new>): scaffold <new> plugin` — covers the plugin scaffold and config-file changes that pertain to the new plugin's own release line.
-      - `feat(marketplace): register <new> plugin` — covers the new entry in `.claude-plugin/marketplace.json#plugins[]` so the catalog version bumps too.
-   8. Merge to `main` → release-please opens **two** release PRs: one for `<new>` (bumping `0.0.0 → 0.1.0`) and one for `marketplace` (minor bump on the catalog version line). Merge both to publish `<new>-v0.1.0` and the corresponding `marketplace-v<bumped>`.
+   7. Open **two squash-merge PRs** in sequence (one per scope, since squash merge yields one commit per PR):
+      - PR 1, title `feat(<new>): scaffold <new> plugin` — contains the plugin scaffold and config-file changes that pertain to the new plugin's own release line.
+      - PR 2, title `feat(marketplace): register <new> plugin` — contains the new entry in `.claude-plugin/marketplace.json#plugins[]` so the catalog version bumps too.
+   8. After both merge to `main`, release-please opens **two** release PRs: one for `<new>` (bumping `0.0.0 → 0.1.0`) and one for `marketplace` (minor bump on the catalog version line). Merge both to publish `<new>-v0.1.0` and the corresponding `marketplace-v<bumped>`.
 4. **Forcing a specific version** — `Release-As: x.y.z` footer.
 5. **What not to commit** — release-please owns all `version` fields plus CHANGELOGs and `.release-please-manifest.json`. Manual edits to those will be overwritten or cause merge conflicts in the active release PR.
 6. **Cross-references** — link to CLAUDE.md "Adding plugin content" and "Adding a new plugin to the catalog".

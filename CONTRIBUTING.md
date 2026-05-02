@@ -31,7 +31,7 @@ Every commit must follow Conventional Commits with a mandatory scope:
 | `chore(<scope>): ...`, `docs(<scope>): ...`, `refactor(<scope>): ...`, `test(<scope>): ...`, `ci(<scope>): ...`, `build(<scope>): ...`, `perf(<scope>): ...` | no version bump; appears in the changelog if release-please's defaults include that section |
 | Any commit with no scope, or a scope that does not match a registered component | no bump for any component; not attributed to any release |
 
-A commit's scope routes it to **exactly one** component. release-please does not dual-route a commit. When a change affects both a plugin and the marketplace catalog, use **two commits** — one per scope.
+A commit's scope routes it to **exactly one** component. release-please does not dual-route a commit. When a change affects both a plugin and the marketplace catalog, split the work across **two PRs** (since squash merge yields one commit per PR) — one per scope. See the new-plugin checklist below for the canonical example.
 
 ### When to use `marketplace` scope
 
@@ -54,9 +54,17 @@ feat(superhuman): promote to stable
 Release-As: 1.0.0
 ```
 
+## Pull requests and merge strategy
+
+This repo uses **squash merging**. Under squash merge, the PR's title becomes the subject of the resulting commit on `main` — release-please reads that subject to decide whether and how to bump versions. Therefore:
+
+- **PR titles must follow Conventional Commits** with the same format and scope rules as commits: `<type>(<scope>): <subject>`. A PR titled `Add foo` will land on `main` as a non-conventional commit and be invisible to release-please.
+- Per-commit messages on a feature branch matter less because squash merge collapses them. They are visible in the PR description (under "Commits") but do not affect release-please. Still, prefer conventional-commit subjects on the feature branch — it makes the PR easier to review and lets you re-use the strongest commit subject as the PR title.
+- If a PR genuinely covers two scopes (e.g. registering a new plugin), split it into **two PRs** — one per scope — so each lands as a single conventional commit on `main`. release-please cannot dual-route a single squash commit any more than it can dual-route a normal commit.
+
 ## Release flow
 
-1. Push conventional commits to `main` (typically via merged PRs).
+1. Push conventional commits to `main` (typically via squash-merged PRs whose titles follow the format above).
 2. The `.github/workflows/release-please.yml` workflow runs on every push to `main`.
 3. For each component with unreleased changes, release-please opens (or updates) a release PR. The PR contains:
    - bumped `version` in the component's `package.json`, in `plugin.json` (for plugins), and in the matching marketplace entry
@@ -107,10 +115,10 @@ To onboard a new plugin called `<new>`:
    }
    ```
 6. Seed `.release-please-manifest.json` with `"plugins/<new>": "0.0.0"`.
-7. Make **two commits** on a feature branch:
-   - `feat(<new>): scaffold <new> plugin` — covers the plugin's own scaffold and the per-plugin config-file changes (`plugins/<new>/**`, the `packages` entry in `release-please-config.json`, the entry in `.release-please-manifest.json`).
-   - `feat(marketplace): register <new> plugin` — covers the new entry in `.claude-plugin/marketplace.json#plugins[]` so the catalog version bumps too.
-8. Open a PR. After it merges to `main`, release-please opens **two** release PRs:
+7. Open **two squash-merge PRs** in sequence (one per scope, since squash merge yields one commit per PR):
+   - PR 1, title `feat(<new>): scaffold <new> plugin` — contains the plugin scaffold and per-plugin config-file changes (`plugins/<new>/**`, the `packages` entry in `release-please-config.json`, the entry in `.release-please-manifest.json`).
+   - PR 2, title `feat(marketplace): register <new> plugin` — contains the new entry in `.claude-plugin/marketplace.json#plugins[]` so the catalog version bumps too.
+8. After both merge to `main`, release-please opens **two** release PRs:
    - one for `<new>` bumping `0.0.0 → 0.1.0`, publishing tag `<new>-v0.1.0`
    - one for `marketplace` bumping the catalog version, publishing tag `marketplace-v<bumped>`
 
