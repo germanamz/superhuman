@@ -2,6 +2,8 @@
 
 This repo is a Claude Code marketplace, not a typical application.
 
+See @CONTRIBUTING.md for commit conventions and the release process.
+
 ## Layout
 
 - `.claude-plugin/marketplace.json` — the marketplace catalog. Every installable plugin in this marketplace appears in its `plugins[]` array.
@@ -23,6 +25,8 @@ When asked to add a skill, command, agent, or hook, place it under the relevant 
 For an inline plugin: create `plugins/<new-name>/.claude-plugin/plugin.json`, then append to `plugins[]` in `.claude-plugin/marketplace.json` with `"source": "./plugins/<new-name>"` (a plain string — relative paths must start with `./`).
 
 For an external plugin: append to `plugins[]` with `"source": { "source": "github", "repo": "owner/repo" }` — no in-repo files needed. Other object-form types: `url`, `git-subdir`, `npm`. The discriminator field is `source`, not `type`.
+
+For inline plugins, also follow the release-please registration steps in @CONTRIBUTING.md so the new plugin gets its own version line and changelog.
 
 ## Verifying changes
 

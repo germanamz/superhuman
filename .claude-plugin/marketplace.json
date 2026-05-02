@@ -1,5 +1,6 @@
 {
   "name": "superhuman",
+  "version": "0.2.0",
   "description": "German's personal Claude Code marketplace",
   "owner": {
     "name": "German Meza",
@@ -8,6 +9,7 @@
   "plugins": [
     {
       "name": "superhuman",
+      "version": "0.1.0",
       "description": "Starter plugin scaffold for the superhuman marketplace",
       "source": "./plugins/superhuman"
     }
