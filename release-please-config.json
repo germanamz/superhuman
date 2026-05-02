@@ -3,7 +3,7 @@
   "release-type": "node",
   "include-component-in-tag": true,
   "separate-pull-requests": true,
-  "pull-request-title-pattern": "chore(${component}): release ${version}",
+  "pull-request-title-pattern": "chore(${componentNoSpace}): release ${version}",
   "bootstrap-sha": "2ada5e786ac01d6becc03948e3715b85017007ee",
   "packages": {
     ".": {
