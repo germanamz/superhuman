@@ -74,13 +74,13 @@ After cloning the repo, run:
 npm install
 ```
 
-This installs `commitlint` and `husky` and runs the `prepare` script, which wires `.husky/commit-msg` into `.git/hooks/`. Subsequent `git commit` invocations validate the message against `commitlint.config.js`.
+This installs `commitlint` and `husky` and runs the `prepare` script, which wires `.husky/commit-msg` into `.git/hooks/`. Subsequent `git commit` invocations validate the message against `commitlint.config.mjs`.
 
 If you skip `npm install` you'll have no local check, but the CI checks still run on your PR. Don't rely on `--no-verify` to land work — the same lint runs in CI and will block the merge.
 
 ### Configured rules
 
-`commitlint.config.js` extends `@commitlint/config-conventional` and adds a `scope-enum` listing the registered components. The PR-title workflow has its own `scopes` list. Both must be kept in sync with the `packages` entries in `release-please-config.json` whenever you add or rename a component (see the new-plugin checklist below).
+`commitlint.config.mjs` extends `@commitlint/config-conventional` and adds a `scope-enum` listing the registered components. The PR-title workflow has its own `scopes` list. Both must be kept in sync with the `packages` entries in `release-please-config.json` whenever you add or rename a component (see the new-plugin checklist below).
 
 ## Pull requests and merge strategy
 
@@ -143,7 +143,7 @@ To onboard a new plugin called `<new>`:
    }
    ```
 6. Seed `.release-please-manifest.json` with `"plugins/<new>": "0.0.0"`.
-7. Add `<new>` to the `scope-enum` list in `commitlint.config.js` and to the `scopes` list in `.github/workflows/lint-pr-title.yml` so the new scope is accepted by both lint layers.
+7. Add `<new>` to the `scope-enum` list in `commitlint.config.mjs` and to the `scopes` list in `.github/workflows/lint-pr-title.yml` so the new scope is accepted by both lint layers.
 8. Open **two squash-merge PRs** in sequence (one per scope, since squash merge yields one commit per PR):
    - PR 1, title `feat(<new>): scaffold <new> plugin` — contains the plugin scaffold, per-plugin config-file changes (`plugins/<new>/**`, the `packages` entry in `release-please-config.json`, the entry in `.release-please-manifest.json`), and the lint-config scope additions from step 7.
    - PR 2, title `feat(marketplace): register <new> plugin` — contains the new entry in `.claude-plugin/marketplace.json#plugins[]` so the catalog version bumps too.

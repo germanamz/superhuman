@@ -220,13 +220,13 @@ Lives at the repo root. Contents:
 
 ## Linting
 
-Conventional-commit format is enforced at three layers, sharing one `commitlint.config.js` whose `scope-enum` mirrors the registered components:
+Conventional-commit format is enforced at three layers, sharing one `commitlint.config.mjs` whose `scope-enum` mirrors the registered components:
 
 - **Local commit-msg hook** — `husky` + `@commitlint/cli` + `@commitlint/config-conventional`. Activated by `npm install`'s `prepare` script. Bypassable with `--no-verify`.
 - **CI per-commit lint** — `wagoid/commitlint-github-action` on every PR push. Unbypassable.
 - **CI PR-title lint** — `amannn/action-semantic-pull-request` on PR open/edit/sync/reopen. The decisive gate, since under squash-merge the PR title becomes the commit subject release-please reads. Unbypassable.
 
-Adding a new plugin requires updating both the `commitlint.config.js` `scope-enum` and the PR-title workflow's `scopes` list in addition to `release-please-config.json`. CONTRIBUTING.md's new-plugin checklist makes this a numbered step.
+Adding a new plugin requires updating both the `commitlint.config.mjs` `scope-enum` and the PR-title workflow's `scopes` list in addition to `release-please-config.json`. CONTRIBUTING.md's new-plugin checklist makes this a numbered step.
 
 ## CLAUDE.md updates
 

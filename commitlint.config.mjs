@@ -5,7 +5,7 @@
  * recognizes; keep it in sync with the `packages` keys in
  * release-please-config.json (mapped to their `component` names).
  */
-module.exports = {
+export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'scope-enum': [2, 'always', ['marketplace', 'superhuman']],
