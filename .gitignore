@@ -2,6 +2,3 @@
 node_modules/
 .claude/
 .worktrees/
-
-# GitHub App private keys (e.g. release-please)
-*.pem
