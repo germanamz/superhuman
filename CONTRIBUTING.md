@@ -54,6 +54,34 @@ feat(superhuman): promote to stable
 Release-As: 1.0.0
 ```
 
+## Linting
+
+Conventional-commit format is enforced at three layers, two of which are unbypassable.
+
+| Layer | Tool | Where it runs | Bypassable |
+|---|---|---|---|
+| Local commit-msg hook | `husky` + `commitlint` + `@commitlint/config-conventional` | On every `git commit` after `npm install` activates the hook | Yes (`git commit --no-verify`) |
+| CI per-commit lint | [`wagoid/commitlint-github-action`](https://github.com/wagoid/commitlint-github-action) | On every push/PR update via `.github/workflows/lint-commits.yml` | No |
+| CI PR-title lint | [`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request) | When a PR is opened, edited, synchronized, or reopened, via `.github/workflows/lint-pr-title.yml` | No |
+
+The PR-title lint is the most important — under squash merge, the PR title becomes the squash commit subject on `main`, which is what release-please reads.
+
+### Activating the local hook
+
+After cloning the repo, run:
+
+```sh
+npm install
+```
+
+This installs `commitlint` and `husky` and runs the `prepare` script, which wires `.husky/commit-msg` into `.git/hooks/`. Subsequent `git commit` invocations validate the message against `commitlint.config.js`.
+
+If you skip `npm install` you'll have no local check, but the CI checks still run on your PR. Don't rely on `--no-verify` to land work — the same lint runs in CI and will block the merge.
+
+### Configured rules
+
+`commitlint.config.js` extends `@commitlint/config-conventional` and adds a `scope-enum` listing the registered components. The PR-title workflow has its own `scopes` list. Both must be kept in sync with the `packages` entries in `release-please-config.json` whenever you add or rename a component (see the new-plugin checklist below).
+
 ## Pull requests and merge strategy
 
 This repo uses **squash merging**. Under squash merge, the PR's title becomes the subject of the resulting commit on `main` — release-please reads that subject to decide whether and how to bump versions. Therefore:
@@ -115,10 +143,11 @@ To onboard a new plugin called `<new>`:
    }
    ```
 6. Seed `.release-please-manifest.json` with `"plugins/<new>": "0.0.0"`.
-7. Open **two squash-merge PRs** in sequence (one per scope, since squash merge yields one commit per PR):
-   - PR 1, title `feat(<new>): scaffold <new> plugin` — contains the plugin scaffold and per-plugin config-file changes (`plugins/<new>/**`, the `packages` entry in `release-please-config.json`, the entry in `.release-please-manifest.json`).
+7. Add `<new>` to the `scope-enum` list in `commitlint.config.js` and to the `scopes` list in `.github/workflows/lint-pr-title.yml` so the new scope is accepted by both lint layers.
+8. Open **two squash-merge PRs** in sequence (one per scope, since squash merge yields one commit per PR):
+   - PR 1, title `feat(<new>): scaffold <new> plugin` — contains the plugin scaffold, per-plugin config-file changes (`plugins/<new>/**`, the `packages` entry in `release-please-config.json`, the entry in `.release-please-manifest.json`), and the lint-config scope additions from step 7.
    - PR 2, title `feat(marketplace): register <new> plugin` — contains the new entry in `.claude-plugin/marketplace.json#plugins[]` so the catalog version bumps too.
-8. After both merge to `main`, release-please opens **two** release PRs:
+9. After both merge to `main`, release-please opens **two** release PRs:
    - one for `<new>` bumping `0.0.0 → 0.1.0`, publishing tag `<new>-v0.1.0`
    - one for `marketplace` bumping the catalog version, publishing tag `marketplace-v<bumped>`
 
