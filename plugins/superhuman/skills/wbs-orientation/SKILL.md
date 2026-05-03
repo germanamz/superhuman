@@ -84,7 +84,7 @@ When brainstorming a node:
 
 While running wrapped brainstorming (step 5) or wrapped writing-plans (step 6), if user phrasing strongly suggests structural drift — phrases like "this contradicts X," "this is actually two stories," "we should split this," "this doesn't fit under <parent>" — emit a one-line hint, *not* a blocking prompt:
 
-> *"Sounds like the shape might need to change. If so, you can run `/wbs-reshape <task-id>` to drive that explicitly, or keep going and the end-of-brainstorm gate will check for contradictions automatically."*
+> *"Sounds like the shape might need to change. If so, you can run `/wbs-reshape <free-form trigger context> task=<task-id>` to drive that explicitly, or keep going and the end-of-brainstorm gate will check for contradictions automatically."*
 
 Emit at most once per brainstorm/plan invocation. Do not interrupt the flow. The hard gates in steps 5.7, 6.6, and 7 are the authoritative triggers.
 
@@ -98,7 +98,7 @@ When planning a Story's implementation:
 2. Let writing-plans produce the plan content.
 3. Post the plan via `tusk_note_add` with `task=<story-id>, meta.type=plan, body=<plan-content>`.
 4. If the plan has phases (heavy phasing — multiple implementer subagents per Tusk task, sequential bridge-code dependencies, etc.), `superhuman:phase-planning-rules` auto-invokes; let it drive the per-phase note shape and the 4–6 task split. Per-phase notes land as `meta.type=phase-plan, meta.phase=phase-N` on the Story, following `templates/wbs/note-phase-plan-heavy.md`. After all phase-plan notes are drafted, `superhuman:phase-continuity-review` auto-invokes before any task is dispatched. After each phase's tasks are workflow-completed and after all phases ship, `superhuman:phase-post-implementation-review` auto-invokes for the per-phase gate and final sequence verification.
-5. Each task in the plan becomes a child Tusk task at `level=task` parented to the Story, tagged `+phase-N` if the plan is phased. Use `/wbs-new task` for each — do not bypass the command.
+5. Each task in the plan becomes a child Tusk task at `level=task` parented to the Story, tagged `+phase-N` if the plan is phased. Use `/wbs-new <free-form context describing the task> task=<story-id>` for each — do not bypass the command.
 6. **Planning-time contradiction gate.** Before posting the plan note, check whether the produced plan can fit the parent Initiative's stated decomposition. Specifically: does the plan require a phase, dependency, or scope element that contradicts the parent's `## Phasing`, `## Out of Scope`, or `## Tradeoffs Considered`? If so, surface the same three-choice prompt described in step 5.7, scoped to the parent of this Story's Initiative (or the nearest ancestor whose Karpathy fields are contradicted). Same defaults: user picks; never auto-decide.
 
 ### 7. Enforce the Karpathy decomposition gate
@@ -121,7 +121,7 @@ If any check fails: name the missing or weak field(s), refuse to proceed with de
 When the gate passes and the user is ready to create children:
 
 1. Read the children list from the description (Milestones / Initiatives / Stories / Tasks section).
-2. For each child title, run `/wbs-new <child-level> "<title>"` — this creates the Tusk task and re-invokes this orchestrator skill on the new node.
+2. For each child, run `/wbs-new <free-form context including level cue and title>` (add `task=<parent-id>` if the parent isn't the current task in session context) — this creates the Tusk task and re-invokes this orchestrator skill on the new node.
 3. Optionally suggest brainstorming each child immediately, or let the user defer.
 
 ### 9. Right-sized description warnings
