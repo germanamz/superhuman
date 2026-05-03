@@ -13,7 +13,7 @@ The flagship plugin of the [superhuman](../../README.md) marketplace. It package
 ### Skills
 
 - `wbs-orientation` — auto-invokes inside any WBS context to detect Tusk state, load the level-appropriate template, wrap brainstorming and plan-writing as Tusk notes, and enforce the decomposition gate.
-- `wbs-reshape` — re-brainstorms a WBS node and applies the resulting structural change.
+- `wbs-reshape-flow` — re-brainstorms a WBS node and applies the resulting structural change. Backs the `/wbs-reshape` command and is auto-invoked by `wbs-orientation` on contradiction gates.
 - `phase-planning-rules` — rules for splitting a Story's implementation into phased plans, each landing as a `meta.type=phase-plan` Tusk note.
 - `phase-continuity-review` — cross-phase consistency review run after all phase plans are drafted, before the first implementer dispatch.
 - `phase-post-implementation-review` — per-phase verification gate plus final sequence review once all phases ship.

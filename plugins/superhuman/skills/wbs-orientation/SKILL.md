@@ -74,9 +74,9 @@ When brainstorming a node:
 6. When brainstorming's terminal step would invoke `writing-plans`, wrap that the same way (see step 6).
 7. **End-of-brainstorm contradiction gate.** Before brainstorming posts the new `meta.type=spec` note via `tusk_note_add`, compare the proposed spec against the parent node's Karpathy fields (`Out of Scope`, `Success Criteria`). If the proposed spec contradicts the parent — for example, the new design needs a capability the parent's "Out of Scope" rules out — surface the contradiction with three choices:
 
-   - **(1) Reshape the parent now (pause-and-resume).** Invoke `superhuman:wbs-reshape` via the Skill tool with the parent as focal node. After it completes (or aborts), re-load the now-refreshed parent context and re-evaluate whether the in-flight spec for this child still makes sense.
+   - **(1) Reshape the parent now (pause-and-resume).** Invoke `superhuman:wbs-reshape-flow` via the Skill tool with the parent as focal node. After it completes (or aborts), re-load the now-refreshed parent context and re-evaluate whether the in-flight spec for this child still makes sense.
    - **(2) Accept the deviation.** Post the spec as-is. Add an entry to the spec note's `## Open Questions` section: "Diverges from parent <parent-id> Out of Scope: <field>. Accepted on <YYYY-MM-DD> pending parent reshape." This becomes a forcing function for whoever later reshapes the parent.
-   - **(3) Abandon this brainstorm.** Discard the in-flight spec content. Reshape the parent first (offer to invoke `superhuman:wbs-reshape` on the parent now), then start the child brainstorm fresh under refreshed context.
+   - **(3) Abandon this brainstorm.** Discard the in-flight spec content. Reshape the parent first (offer to invoke `superhuman:wbs-reshape-flow` on the parent now), then start the child brainstorm fresh under refreshed context.
 
    Default to none — the user must pick. Do not auto-decide.
 
@@ -148,8 +148,8 @@ Suggest these as the user fills the References section. The user picks; do not a
 
 When reshaping a node — explicit `/wbs-reshape` invocation, or one of the gate-driven offers from steps 5.7 / 6.6 / 7:
 
-1. Invoke the `superhuman:wbs-reshape` skill via the Skill tool, passing the focal node's short ID and (if the trigger surfaced one) the contradicting parent context.
-2. The reshape skill drives its own loop — context load, trigger capture, wrapped brainstorming, per-child disposition, mutation, audit note. See `plugins/superhuman/skills/wbs-reshape/SKILL.md`.
+1. Invoke the `superhuman:wbs-reshape-flow` skill via the Skill tool, passing the focal node's short ID and (if the trigger surfaced one) the contradicting parent context.
+2. The reshape skill drives its own loop — context load, trigger capture, wrapped brainstorming, per-child disposition, mutation, audit note. See `plugins/superhuman/skills/wbs-reshape-flow/SKILL.md`.
 3. When reshape completes, it returns a structured summary (focal node ID, new spec note ID, audit note ID, disposition list, gate-pass flag).
 4. **If reshape was invoked from step 5.7 or 6.6 (pause-and-resume)**: reload the now-refreshed parent context. Re-display the in-flight child spec or plan. Ask the user: "Parent context has been reshaped. Does the in-flight content for this child still make sense, or do you want to revise?" Revise → restart the child's wrapped brainstorming/writing-plans flow with refreshed context. Keep → proceed to commit.
 5. **If reshape was invoked from step 7 (gate failure)**: re-run the Karpathy gate on the original child node. If it now passes, proceed with decomposition transition. If it still fails for an unrelated reason, surface that.

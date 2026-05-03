@@ -1,5 +1,5 @@
 ---
-name: wbs-reshape
+name: wbs-reshape-flow
 description: Re-brainstorm a WBS node with full original context and apply the resulting structural change — archive, reparent, or keep descendants — when discovery during brainstorming, planning, or implementation contradicts an earlier shape. Auto-invoked by wbs-orientation on end-of-brainstorm, planning-time, or decomposition-gate-failure triggers; also invoked explicitly via `/wbs-reshape <free-form trigger context> task=<task-id>`.
 ---
 
@@ -118,7 +118,7 @@ Apply in this exact order. Each step is a single Tusk MCP call (or a small bound
 3. **Update the focal node's description** via `tusk_task_modify task=<focal-id> description=<new-description> version=<current-version>`. The new description has Karpathy fields populated from the new spec (paraphrased — the spec is the authoritative version, the description is the lean-ticket reference per `templates/wbs/conventions.md`). The `## <Children>` section is rebuilt from step 7's dispositions.
 4. **Apply each child disposition.** For each direct child, in the order surfaced in step 7:
    - **Keep unchanged**: no-op.
-   - **Reparent (with recursion)**: `tusk_task_modify task=<child-id> parent=<new-parent-id> version=<child-version>`. The recursive `wbs-reshape` invocation runs immediately after the modify call returns, before processing the next child. Its mutations land in this run's step 8 ordering and its own audit note posts as part of the recursive run; the parent-reshape note (this run's) is created in substep 5 and lists the recursive run's audit-note ID in its `## Nested Reshapes` section.
+   - **Reparent (with recursion)**: `tusk_task_modify task=<child-id> parent=<new-parent-id> version=<child-version>`. The recursive `wbs-reshape-flow` invocation runs immediately after the modify call returns, before processing the next child. Its mutations land in this run's step 8 ordering and its own audit note posts as part of the recursive run; the parent-reshape note (this run's) is created in substep 5 and lists the recursive run's audit-note ID in its `## Nested Reshapes` section.
    - **Reparent (without recursion)**: `tusk_task_modify task=<child-id> parent=<new-parent-id> version=<child-version>`. Do not modify the child's description here — the deferred-reshape entry on `## Open Questions` is patched in substep 6, once the audit note's short-id is known.
    - **Archive**: see "Archive semantics" below for the four-step procedure.
 5. **Post the `meta.type=reshape` audit note** on the focal node, using `templates/wbs/note-reshape.md` as the body shape. Set:
