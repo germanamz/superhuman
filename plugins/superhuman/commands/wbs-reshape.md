@@ -7,7 +7,7 @@ argument-hint: <free-form context describing the trigger> [task=<focal-id>] [pro
 
 Reshape a WBS node by re-brainstorming its outcome with full context of the original reasoning, then walking per-child disposition decisions (keep / reparent / archive). Posts a `meta.type=reshape` audit note on the focal node capturing the trigger, reasoning, invalidated assumptions, and structural changes.
 
-This is the explicit entry point. The same skill is also auto-invoked by `wbs-orientation` when an end-of-brainstorm, planning-time, or decomposition-gate signal indicates contradiction with parent context — see `plugins/superhuman/skills/wbs-orientation/SKILL.md` steps 5.7, 6.6, and 7.
+This is the explicit entry point. The same `wbs-reshape-flow` skill is also auto-invoked by `wbs-orientation` when an end-of-brainstorm, planning-time, or decomposition-gate signal indicates contradiction with parent context — see `plugins/superhuman/skills/wbs-orientation/SKILL.md` steps 5.7, 6.6, and 7.
 
 ## Input
 
@@ -26,7 +26,7 @@ Free-form text describing why the reshape is being triggered — the contradicti
 
 3. **Resolve the focal node.** If `task=<id>` was passed, use it directly. Otherwise pass through to the skill — its step 2 handles fall-back resolution (most-recently-inspected task, then user prompt).
 
-4. **Hand off to the `wbs-reshape` skill.** Invoke `superhuman:wbs-reshape` via the Skill tool with the resolved project, focal node ID (if known), and free-form trigger context as initial inputs. The skill drives the full workflow — context load, trigger capture, wrapped brainstorming, per-child disposition, mutation, audit note, Karpathy gate.
+4. **Hand off to the `wbs-reshape-flow` skill.** Invoke `superhuman:wbs-reshape-flow` via the Skill tool with the resolved project, focal node ID (if known), and free-form trigger context as initial inputs. The skill drives the full workflow — context load, trigger capture, wrapped brainstorming, per-child disposition, mutation, audit note, Karpathy gate.
 
 ## Errors
 
@@ -45,4 +45,4 @@ Free-form text describing why the reshape is being triggered — the contradicti
 
 ## Why the command stays thin
 
-The `wbs-reshape` skill is also invoked by `wbs-orientation` for auto-invoke triggers. If this command had real workflow logic embedded, the orchestrator would have to duplicate it. Keeping the command as a thin entry point means there's one source of truth for reshape behavior — the skill at `plugins/superhuman/skills/wbs-reshape/SKILL.md`.
+The `wbs-reshape-flow` skill is also invoked by `wbs-orientation` for auto-invoke triggers. If this command had real workflow logic embedded, the orchestrator would have to duplicate it. Keeping the command as a thin entry point means there's one source of truth for reshape behavior — the skill at `plugins/superhuman/skills/wbs-reshape-flow/SKILL.md`.

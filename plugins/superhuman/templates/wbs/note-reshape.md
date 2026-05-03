@@ -1,7 +1,7 @@
 # Reshape — <focal-node-title> (<short-id>) — <YYYY-MM-DD>
 
 <!--
-Audit-note template for `meta.type=reshape` notes posted on the focal node by the wbs-reshape skill.
+Audit-note template for `meta.type=reshape` notes posted on the focal node by the wbs-reshape-flow skill.
 
 Tusk metadata to set when creating this note:
   meta.type=reshape
