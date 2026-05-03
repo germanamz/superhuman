@@ -1,6 +1,6 @@
 ---
 name: wbs-reshape
-description: Re-brainstorm a WBS node with full original context and apply the resulting structural change — archive, reparent, or keep descendants — when discovery during brainstorming, planning, or implementation contradicts an earlier shape. Auto-invoked by wbs-orientation on end-of-brainstorm, planning-time, or decomposition-gate-failure triggers; also invoked explicitly via `/wbs-reshape <task-id>`.
+description: Re-brainstorm a WBS node with full original context and apply the resulting structural change — archive, reparent, or keep descendants — when discovery during brainstorming, planning, or implementation contradicts an earlier shape. Auto-invoked by wbs-orientation on end-of-brainstorm, planning-time, or decomposition-gate-failure triggers; also invoked explicitly via `/wbs-reshape <free-form trigger context> task=<task-id>`.
 ---
 
 # WBS Reshape
@@ -13,7 +13,7 @@ The skill's purpose is *context-aware re-brainstorm*, not mechanical subtree edi
 
 Invoke when ANY of the following is true:
 
-- The user runs `/wbs-reshape <task-id>` (or `/wbs-reshape` with focal node from session context).
+- The user runs `/wbs-reshape <free-form trigger context> task=<task-id>` (or `/wbs-reshape <context>` with focal node from session context).
 - The `wbs-orientation` skill delegates to this skill on an end-of-brainstorm contradiction gate (parent's Karpathy fields contradict the proposed child spec), a planning-time contradiction gate (plan can't fit parent's stated decomposition), or a decomposition-gate failure caused by a parent constraint.
 - The user describes mid-flight learning that invalidates a node's prior shape ("we need to split this story", "the parent initiative was wrongly scoped", "external priorities changed and this branch should be retired").
 
@@ -23,7 +23,7 @@ Do **not** invoke for routine description edits, typo fixes, or phrasing changes
 
 ### 1. Detect Tusk context
 
-- If invoked with an explicit `project=<name>` argument, look it up via `tusk_project_list` and filter for the named project. Hard error if it isn't returned. Otherwise call `tusk_project_list` to identify the active project (filter by current context, or ask the user if multiple projects exist).
+- If invoked with an explicit `project=<id>` argument (id or name), look it up via `tusk_project_list`. Hard error if it isn't returned. Otherwise call `tusk_project_list` to identify the active project (filter by current context, or ask the user if multiple projects exist).
 - Hard error if Tusk MCP is unreachable. Point at `templates/wbs/taxonomy.md` for setup.
 - Hard error if the project has no taxonomy. Surface the recommended taxonomy from `templates/wbs/taxonomy.md` and offer to apply it.
 - Hard error if the project's workflow has no terminal cancelled / won't-do status. Reshape archive semantics require it; surface the requirement and refuse to proceed until the workflow is updated.
@@ -32,7 +32,7 @@ Do **not** invoke for routine description edits, typo fixes, or phrasing changes
 
 In priority order:
 
-1. Explicit task ID from `/wbs-reshape <id>`.
+1. Explicit `task=<id>` from `/wbs-reshape`.
 2. Auto-invoke focal node passed by `wbs-orientation` (when delegated from an end-of-brainstorm, planning-time, or decomposition-gate trigger).
 3. The most recently inspected, modified, or created Tusk task this session.
 4. Ask the user, listing recent candidates via `tusk_task_list`.
@@ -96,7 +96,7 @@ If brainstorming's spec content does not converge (user gives up, asks too many 
 For each direct child of the focal node (loaded in step 3), present the user with the new spec content from step 6 and ask one of:
 
 - **Keep unchanged.** Leave the child alone. The new spec's children list still names this child.
-- **Reparent.** The child belongs under a different parent in the new shape. Ask which parent — an existing Tusk task or a new one. If new, run `/wbs-new <level> "<title>"` first to create it. Apply the move via `tusk_task_modify parent=<new-parent-id>` (the child's subtree comes along automatically — Tusk reparents the whole subtree). Then ask: *"Reshape this child now under its new parent?"*
+- **Reparent.** The child belongs under a different parent in the new shape. Ask which parent — an existing Tusk task or a new one. If new, run `/wbs-new <free-form context including level cue and title> task=<grandparent-id>` first to create it. Apply the move via `tusk_task_modify parent=<new-parent-id>` (the child's subtree comes along automatically — Tusk reparents the whole subtree). Then ask: *"Reshape this child now under its new parent?"*
   - If **yes**: recurse into step 1 of this skill with the reparented child as the new focal node. The recursive run posts its own `meta.type=reshape` note; the parent reshape's audit note (this run's) lists the nested reshape note ID in its `## Nested Reshapes` section. If recursion depth from the top-level invocation exceeds 3, pause and confirm with the user that continued descent is intended — deeply-nested reshapes usually mean the wrong focal node was chosen at the top.
   - If **no**: capture the deferral. Step 8.6 patches the child's `## Open Questions` section once the audit note's short-id is known. Do not edit the child's description in step 7. The patch format applied at step 8.6 is: `Reshape under new parent <new-parent-id> context — deferred from reshape <audit-note-short-id> on <YYYY-MM-DD>.`
 - **Archive.** The child no longer fits the new shape. Apply archive semantics (see "Archive semantics" below). Children of the archived child are archived recursively unless they have already been explicitly reparented out earlier in this loop.
@@ -107,7 +107,7 @@ For children currently in `in_progress` or `in_review` (from step 3's concurrenc
 
 Default is **N**. Soft-mode skipping is not allowed. If the user declines, the child must be **kept unchanged** for this reshape — they can revisit after the in-flight work completes.
 
-The user can also elect to **create new children** that didn't exist before. For each new child, run `/wbs-new <level> "<title>"` to scaffold it under the focal node. New children are listed in the audit note's `## New Shape` section as `**created via /wbs-new**`.
+The user can also elect to **create new children** that didn't exist before. For each new child, run `/wbs-new <free-form context including level cue and title> task=<focal-id>` to scaffold it under the focal node. New children are listed in the audit note's `## New Shape` section as `**created via /wbs-new**`.
 
 ### 8. Apply mutations
 

@@ -71,7 +71,7 @@ A reshape always:
 4. Updates each direct child to one of three states: kept unchanged, reparented (subtree comes along), or archived.
 5. Re-runs the Karpathy decomposition gate on the focal node's new description.
 
-Use `/wbs-reshape <task-id>` to invoke explicitly, or let `wbs-orientation` auto-offer when an end-of-brainstorm, planning-time, or decomposition-gate signal indicates contradiction with parent context.
+Use `/wbs-reshape <free-form trigger context> task=<task-id>` to invoke explicitly, or let `wbs-orientation` auto-offer when an end-of-brainstorm, planning-time, or decomposition-gate signal indicates contradiction with parent context.
 
 ## Archive semantics
 
