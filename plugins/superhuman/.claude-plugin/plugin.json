@@ -1,7 +1,7 @@
 {
   "name": "superhuman",
   "description": "WBS-driven decomposition, planning, and phase-review skills for Tusk-backed projects",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "German Meza",
     "email": "iam@germanamz.com"
