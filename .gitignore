@@ -2,3 +2,6 @@
 node_modules/
 .claude/
 .worktrees/
+
+# Tusk local index
+.tusk/
