@@ -21,9 +21,16 @@ Do **not** invoke for tasks in projects with no WBS taxonomy, or for non-Tusk fi
 
 ### 1. Detect Tusk context
 
+- **Pack-presence check (Tusk v1).** Before anything else, verify the `superhuman-wbs` pack is installed in the active workspace. Probe with `tusk_node_list type=wbs-node`: an error indicating the type is undeclared (or an explicit "unknown node type" response) means the pack isn't loaded. When that happens, surface this hint and abort the current operation — do not fall back, do not attempt repair:
+
+  > The `superhuman-wbs` pack isn't installed in this workspace. Run `/wbs-bootstrap` to initialize Tusk and add the pack, then re-run what you were doing.
+
+  This is the only intervention this skill does about workspace setup — `/wbs-bootstrap` owns the actual mutation. If `tusk_node_list type=wbs-node` succeeds (even with zero rows), the pack is present; continue.
 - If the invoking command passed an explicit `project=<name>` argument, look it up via `tusk_project_list` and filter for the named project. Hard error if it isn't returned. Otherwise call `tusk_project_list` to identify the active project (filter by current context, or ask the user if multiple projects exist).
 - Hard error if Tusk MCP is unreachable. Point at `templates/wbs/taxonomy.md` for setup.
 - Hard error if the project has no taxonomy. Surface the recommended taxonomy from `templates/wbs/taxonomy.md` and offer to apply it (workspace-wide or per-project).
+
+> The two bullets below this point still reference Tusk v0 concepts (`tusk_project_list`, per-project taxonomy). They are slated for rewrite in Story S3 (orientation-skill-rewrite) of the Tusk v1 migration. Until S3 lands, treat them as historical guidance — the only step 1 behavior that runs cleanly against Tusk v1 today is the pack-presence check above.
 
 ### 2. Identify the current node
 
