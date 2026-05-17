@@ -1,0 +1,106 @@
+# Superhuman WBS — Tusk type pack
+#
+# Adds the node and edge types the Superhuman plugin needs to drive its
+# Work Breakdown Structure flow on top of Tusk v1.
+#
+# Two node types:
+#   - wbs-node : a Project / Milestone / Initiative / Story / Task / Spike
+#                — `level` distinguishes them; the WBS-parent edge captures
+#                hierarchy.
+#   - wbs-note : a spec / plan / brainstorm / phase-plan / reshape-audit
+#                attached to a wbs-node via the WBS-about edge.
+#
+# Three edge types:
+#   - wbs-parent     : WBS hierarchy between wbs-nodes
+#   - wbs-about      : which wbs-node a wbs-note pertains to
+#   - wbs-supersedes : new wbs-note replaces a prior wbs-note (the
+#                      append-only spec / plan history pattern)
+#
+# Edge names are prefixed `wbs-` to avoid colliding with the kanban pack's
+# `parent` edge if a workspace adds both.
+#
+# Status is governed by the [behaviors.workflow.wbs-workflow] block at the
+# bottom — do not redeclare `status` on wbs-node, the workflow validator
+# rejects duplicates.
+
+[node-types.wbs-node]
+description = "A WBS node — Project / Milestone / Initiative / Story / Task / Spike"
+properties = [
+    { name = "level",    type = "enum", values = ["project","milestone","initiative","story","task","spike"] },
+    { name = "phase",    type = "string" },
+    { name = "archived", type = "bool" },
+]
+
+[node-types.wbs-note]
+description = "A spec / plan / brainstorm / phase-plan note attached to a wbs-node"
+properties = [
+    { name = "kind",     type = "enum", values = ["spec","plan","brainstorm","phase-plan","reshape-audit"] },
+    { name = "phase",    type = "string" },
+    { name = "archived", type = "bool" },
+]
+
+[edge-types.wbs-parent]
+description = "WBS parent — this wbs-node is a child of another wbs-node"
+from        = ["wbs-node"]
+to          = ["wbs-node"]
+cardinality = "many-to-one"
+ordered     = true
+acyclic     = true
+inverse     = "wbs-children"
+
+[edge-types.wbs-about]
+description = "This wbs-note is about a wbs-node"
+from        = ["wbs-note"]
+to          = ["wbs-node"]
+cardinality = "many-to-one"
+ordered     = false
+acyclic     = true
+inverse     = "wbs-notes"
+
+[edge-types.wbs-supersedes]
+description = "This wbs-note replaces a prior wbs-note (append-only history)"
+from        = ["wbs-note"]
+to          = ["wbs-note"]
+cardinality = "many-to-one"
+ordered     = false
+acyclic     = true
+inverse     = "wbs-superseded-by"
+
+[behaviors.workflow.wbs-workflow]
+applies-to      = ["wbs-node"]
+status-property = "status"
+
+states = [
+    { name = "drafted",            initial  = true },
+    { name = "brainstorming",      start    = true },
+    { name = "spec-ready" },
+    { name = "planning" },
+    { name = "plan-ready" },
+    { name = "ready-to-decompose" },
+    { name = "in-progress" },
+    { name = "completed",          terminal = true, done = true },
+    { name = "archived",           terminal = true },
+]
+
+transitions = [
+    { from = "drafted",            to = "brainstorming" },
+    { from = "brainstorming",      to = "spec-ready" },
+    { from = "spec-ready",         to = "planning" },
+    { from = "spec-ready",         to = "ready-to-decompose" },
+    { from = "planning",           to = "plan-ready" },
+    { from = "plan-ready",         to = "ready-to-decompose" },
+    { from = "ready-to-decompose", to = "in-progress" },
+    { from = "in-progress",        to = "completed" },
+    { from = "spec-ready",         to = "brainstorming" },
+    { from = "planning",           to = "brainstorming" },
+    { from = "plan-ready",         to = "brainstorming" },
+    { from = "ready-to-decompose", to = "brainstorming" },
+    { from = "in-progress",        to = "brainstorming" },
+    { from = "drafted",            to = "archived" },
+    { from = "brainstorming",      to = "archived" },
+    { from = "spec-ready",         to = "archived" },
+    { from = "planning",           to = "archived" },
+    { from = "plan-ready",         to = "archived" },
+    { from = "ready-to-decompose", to = "archived" },
+    { from = "in-progress",        to = "archived" },
+]
