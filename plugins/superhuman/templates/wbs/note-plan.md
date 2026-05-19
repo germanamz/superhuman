@@ -1,8 +1,8 @@
 # Plan — <node-title>
 
-**Tusk note metadata:** `meta.type=plan`
+**wbs-note frontmatter:** `kind=plan` (linked to its node by a `wbs-about` edge)
 
-**Spec reference:** `<note-id of the spec note>`
+**Spec reference:** `[[wbs/<project>/<story>-spec]]` (wikilink — materializes a `references` edge to the spec note)
 
 ## File Structure
 
@@ -10,7 +10,7 @@
 
 ## Tasks
 
-<Numbered task list. Each task corresponds to a Tusk task that will be created at `level=task` parented to the Story this plan belongs to. For each:
+<Numbered task list. Each task corresponds to a wbs-node that will be created at `level=task` parented to the Story this plan belongs to. For each:
 
 ### Task <N>: <title>
 
@@ -21,7 +21,7 @@
 - [ ] Step description
 - [ ] Commit
 
-If the plan is heavily phased, group tasks by `+phase-N` and reference the corresponding `note-phase-plan-heavy.md` note for the phase contract.>
+If the plan is heavily phased, group tasks by `phase=phase-N` and reference the corresponding `note-phase-plan-heavy.md` note for the phase contract.>
 
 ## Verification
 

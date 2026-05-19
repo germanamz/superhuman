@@ -27,13 +27,13 @@ Expected: <exact expected output or behavior>>
 
 ## References
 
-<Tusk artifacts to consult while executing:
-- Spec note: `<note-id-or-link>`
-- Plan note: `<note-id-or-link>`
-- Phase plan note (if phased): `<note-id-or-link>`
-- Sibling tasks (cohort context): `<short-id>, <short-id>, …`
-- Parent task annotations of interest: `<annotation-id>, …`>
+<Tusk artifacts to consult while executing, as `[[wikilinks]]` (each materializes a `references` edge):
+- Spec note: `[[wbs/<project>/<story>-spec]]`
+- Plan note: `[[wbs/<project>/<story>-plan]]`
+- Phase plan note (if phased): `[[wbs/<project>/<story>-phase-N]]`
+- Sibling tasks (cohort context): `[[wbs/<project>/<sibling>]]`, …
+- Parent annotations of interest: `[[wbs/<project>/<note>]]`, …>
 
 ## Phase
 
-<If part of a phase: `+phase-N`. Else: "Not phased.">
+<If part of a phase: `phase=phase-N`. Else: "Not phased.">

@@ -35,4 +35,4 @@ No phases needed.
 
 ## Milestones
 
-<The milestone titles this project decomposes into. Each becomes a Tusk task at `level=milestone` parented to this Project.>
+<The milestone titles this project decomposes into. Each becomes a wbs-node at `level=milestone` parented to this Project via a `wbs-parent` edge.>

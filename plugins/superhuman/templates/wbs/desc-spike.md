@@ -33,4 +33,4 @@
 
 ## Phase
 
-<If part of a phase: `+phase-N`. Else: "Not phased.">
+<If part of a phase: `phase=phase-N`. Else: "Not phased.">

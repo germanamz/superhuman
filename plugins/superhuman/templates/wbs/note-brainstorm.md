@@ -1,6 +1,6 @@
 # Brainstorm — <node-title>
 
-**Tusk note metadata:** `meta.type=brainstorm`
+**wbs-note frontmatter:** `kind=brainstorm` (linked to its node by a `wbs-about` edge)
 
 ## Context
 

@@ -1,6 +1,6 @@
 # Phase plan (heavy) — <parent-title> / phase <N>
 
-**Tusk note metadata:** `meta.type=phase-plan, meta.phase=phase-<N>`
+**wbs-note frontmatter:** `kind=phase-plan, phase=phase-<N>` (linked to its Story by a `wbs-about` edge)
 
 **Use this template when** the parent node is a Story whose implementation plan needs phasing — typically because the work splits across multiple implementer agents or has compilation-safety bridge code requirements. Follows the contract from the existing `phase-planning-rules` skill.
 
@@ -14,7 +14,7 @@
 
 ## Tasks (4–6)
 
-<A numbered list of exactly 4–6 tasks the implementer agent will execute. Each task is a Tusk task at `level=task`, parented to the Story, tagged `+phase-<N>`.
+<A numbered list of exactly 4–6 tasks the implementer agent will execute. Each task is a wbs-node at `level=task`, parented to the Story via `wbs-parent`, with the `phase=phase-<N>` property.
 
 ### Task 1: <title>
 
@@ -31,7 +31,7 @@ Steps: ordered checkbox list.
 
 | Bridge | Introduced for | Removal target |
 |---|---|---|
-| `<symbol or file>` | <reason> | `+phase-<K>` |>
+| `<symbol or file>` | <reason> | `phase-<K>` |>
 
 ## Compilation Safety
 

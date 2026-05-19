@@ -36,4 +36,4 @@ No phases needed.
 
 ## Stories
 
-<The story titles this initiative spans. Each becomes a Tusk task at `level=story` parented to this Initiative.>
+<The story titles this initiative spans. Each becomes a wbs-node at `level=story` parented to this Initiative via a `wbs-parent` edge.>

@@ -1,12 +1,16 @@
-# Reshape — <focal-node-title> (<short-id>) — <YYYY-MM-DD>
+# Reshape — <focal-node-title> — <YYYY-MM-DD>
 
 <!--
-Audit-note template for `meta.type=reshape` notes posted on the focal node by the wbs-reshape-flow skill.
+Audit-note template for `kind=reshape-audit` wbs-notes created on the focal node by the wbs-reshape-flow skill.
 
-Tusk metadata to set when creating this note:
-  meta.type=reshape
-  meta.reshape-of-spec=<short-id of the spec note this reshape supersedes>
-  meta.parent-reshape=<short-id of parent reshape note, if this is a nested reshape>
+Frontmatter to set when creating this note:
+  kind=reshape-audit
+
+Edges (created via tusk_edge_add, materialized into frontmatter):
+  wbs-about     → the focal node
+  wbs-supersedes → the prior spec note this reshape supersedes
+
+Node references in the body use [[wikilinks]] (each materializes a `references` edge), so the graph captures the lineage and disposition links.
 
 The Reasoning section is load-bearing — capture the user's explanation of what was learned, not a mechanical diff. A future reader sees the prior spec, the new spec, and this note bridges them with the learning.
 -->
@@ -25,31 +29,31 @@ The Reasoning section is load-bearing — capture the user's explanation of what
 ## Original Shape (before reshape)
 - Outcome: <one line from prior spec>
 - Children:
-  - <child short-id> "<title>" — <level>
+  - `[[wbs/<project>/<child>]]` "<title>" — <level>
   - …
 
 ## New Shape (after reshape)
-- Outcome: <one line from new spec — link to new spec note ID>
+- Outcome: <one line from new spec — `[[wbs/<project>/<focal>-spec]]`>
 - Children:
-  - <child short-id> "<title>" — <level> — **kept unchanged**
-  - <child short-id> "<title>" — <level> — **reparented to <new-parent-id>**
-  - <child short-id> "<title>" — <level> — **archived**
+  - `[[wbs/<project>/<child>]]` "<title>" — <level> — **kept unchanged**
+  - `[[wbs/<project>/<child>]]` "<title>" — <level> — **reparented to `[[wbs/<project>/<new-parent>]]`**
+  - `[[wbs/<project>/<child>]]` "<title>" — <level> — **archived**
   - <NEW> "<title>" — <level> — **created via /wbs-new**
 
 ## Deferred Reshapes
-<Children reparented but not reshaped now. Their description's `## Open Questions` section was updated with a "Reshape under new parent context" entry. Listed here for traceability.>
+<Children reparented but not reshaped now. Their body's `## Open Questions` section was updated with a "Reshape under new parent context" entry. Listed here for traceability.>
 
-- <child short-id> — reparented to <new-parent-id>; reshape deferred
+- `[[wbs/<project>/<child>]]` — reparented to `[[wbs/<project>/<new-parent>]]`; reshape deferred
 - (none)
 
 ## Nested Reshapes
-<Reshape notes posted on descendants during this flow's recursion. By note short-id.>
+<Reshape audit notes created on descendants during this flow's recursion.>
 
-- <reshape-note-id> on <child short-id>
+- `[[wbs/<project>/<child>-reshape]]` on `[[wbs/<project>/<child>]]`
 - (none)
 
 ## References
-- Prior spec note: <short-id> (archived)
-- New spec note: <short-id>
-- Prior plan note (if any): <short-id> (archived)
-- Parent reshape note (if nested): <short-id>
+- Prior spec note: `[[wbs/<project>/<focal>-spec-prior]]` (archived; also linked via `wbs-supersedes`)
+- New spec note: `[[wbs/<project>/<focal>-spec]]`
+- Prior plan note (if any): `[[wbs/<project>/<focal>-plan-prior]]` (archived)
+- Parent reshape note (if nested): `[[wbs/<project>/<parent>-reshape]]`
