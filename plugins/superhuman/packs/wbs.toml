@@ -10,7 +10,7 @@
 #   - wbs-note : a spec / plan / brainstorm / phase-plan / reshape-audit
 #                attached to a wbs-node via the WBS-about edge.
 #
-# Four edge types:
+# Five edge types:
 #   - wbs-parent     : WBS hierarchy between wbs-nodes (ordered — sibling
 #                      order under a parent doubles as the priority signal)
 #   - wbs-about      : which wbs-node a wbs-note pertains to
@@ -18,9 +18,17 @@
 #                      append-only spec / plan history pattern)
 #   - wbs-blocks     : this wbs-node blocks another from progressing
 #                      (with inverse wbs-blocked-by)
+#   - references     : implicit edge materialized from body `[[wikilinks]]`.
+#                      Declaring it activates Tusk's wikilink materializer,
+#                      so cross-references in node/note bodies (a task's
+#                      spec/plan/phase-plan links, reshape dispositions)
+#                      become real edges. MUST be named `references` (the
+#                      materializer hard-codes the name) — this is the one
+#                      edge that can't carry the `wbs-` prefix.
 #
-# Edge names are prefixed `wbs-` to avoid colliding with the kanban pack's
-# generic edges (`parent`, `blocks`) if a workspace adds both.
+# The four `wbs-`-prefixed edges avoid colliding with the kanban pack's
+# generic edges (`parent`, `blocks`) if a workspace adds both. `references`
+# is the deliberate exception (see composition matrix below).
 #
 # Status is governed by the [behaviors.workflow.wbs-workflow] block at the
 # bottom — do not redeclare `status` on wbs-node, the workflow validator
@@ -43,19 +51,26 @@
 #
 # Composition matrix
 # ------------------
-# This pack is self-contained. It composes cleanly with:
+# This pack is self-contained (wikilinks materialize without vault). It
+# composes with:
 #   - tags    (`tusk pack add tags`)    — adds [node-types.tag] and a
 #                                          `tagged` edge; no collisions
 #                                          with this pack.
-#   - vault   (`tusk pack add vault`)   — adds note/decision node types
-#                                          and a `references` edge; no
-#                                          collisions with this pack.
 #   - kanban  (`tusk pack add kanban`)  — adds `ticket` + the generic
 #                                          `parent` / `blocks` edges and
 #                                          a `kanban` workflow on ticket.
-#                                          Coexists because our edges are
-#                                          `wbs-`-prefixed and our workflow
-#                                          is named `wbs-workflow`.
+#                                          Coexists because our WBS edges
+#                                          are `wbs-`-prefixed and our
+#                                          workflow is named `wbs-workflow`.
+#   - vault   (`tusk pack add vault`)   — COLLIDES on `references` (vault
+#                                          declares it too). Add only one
+#                                          of the two `references` decls:
+#                                          if vault is already present,
+#                                          drop our `[edge-types.references]`
+#                                          before adding this pack (or use
+#                                          `tusk pack add --force`). Both
+#                                          declarations are equivalent, so
+#                                          either source works.
 # Order of `tusk pack add` does not matter (one-way append, no re-emit).
 
 [node-types.wbs-node]
@@ -111,6 +126,15 @@ cardinality = "many-to-many"
 ordered     = false
 acyclic     = true
 inverse     = "wbs-blocked-by"
+
+[edge-types.references]
+description = "Implicit edge materialized from body [[wikilinks]]. Declaring it activates Tusk's wikilink materializer. Must be named `references`."
+from        = ["*"]
+to          = ["*"]
+cardinality = "many-to-many"
+ordered     = false
+acyclic     = false
+inverse     = "referenced-by"
 
 [behaviors.workflow.wbs-workflow]
 applies-to      = ["wbs-node"]

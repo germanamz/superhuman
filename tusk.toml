@@ -132,6 +132,15 @@ ordered     = false
 acyclic     = true
 inverse     = "wbs-blocked-by"
 
+[edge-types.references]
+description = "Implicit edge materialized from body [[wikilinks]]. Declaring it activates Tusk's wikilink materializer. Must be named `references`."
+from        = ["*"]
+to          = ["*"]
+cardinality = "many-to-many"
+ordered     = false
+acyclic     = false
+inverse     = "referenced-by"
+
 [behaviors.workflow.wbs-workflow]
 applies-to      = ["wbs-node"]
 status-property = "status"
