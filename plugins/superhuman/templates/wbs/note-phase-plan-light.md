@@ -1,6 +1,6 @@
 # Phase plan (light) — <parent-title> / phase <N>
 
-**Tusk note metadata:** `meta.type=phase-plan, meta.phase=phase-<N>`
+**wbs-note frontmatter:** `kind=phase-plan, phase=phase-<N>` (linked to its parent node by a `wbs-about` edge)
 
 **Use this template when** the parent node is at Project, Milestone, or Initiative level and you need to break design or research work into chunks.
 
@@ -10,11 +10,11 @@
 
 ## Dependencies
 
-<Other phases that must complete before this one starts (`+phase-K`), or "none" if this phase has no upstream dependencies.>
+<Other phases that must complete before this one starts (`phase-K`), or "none" if this phase has no upstream dependencies.>
 
 ## Parallelism
 
-<Can this phase run in parallel with other phases? List the parallel-eligible siblings (`+phase-K`), or "must run sequentially after dependencies."
+<Can this phase run in parallel with other phases? List the parallel-eligible siblings (`phase-K`), or "must run sequentially after dependencies."
 
 ## Owner
 
@@ -22,7 +22,7 @@
 
 ## Tasks in this phase
 
-<Tusk task short IDs of the children tagged `+phase-<N>`. Populated as those tasks are created.>
+<Wikilinks to the children with `phase=phase-<N>`, e.g. `[[wbs/<project>/<task>]]`. Populated as those tasks are created; each materializes a `references` edge.>
 
 ## Notes
 

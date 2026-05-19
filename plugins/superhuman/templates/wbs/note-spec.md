@@ -1,6 +1,6 @@
 # Spec — <node-title>
 
-**Tusk note metadata:** `meta.type=spec`
+**wbs-note frontmatter:** `kind=spec` (linked to its node by a `wbs-about` edge)
 
 ## Goal
 

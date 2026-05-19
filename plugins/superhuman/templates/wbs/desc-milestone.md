@@ -28,8 +28,8 @@
 
 No phases needed.
 
-<Or, if phased: list phases as `+phase-1`, `+phase-2`, etc., with outcomes and dependencies. See `note-phase-plan-light.md` for the per-phase note shape.>
+<Or, if phased: list phases as `phase=phase-1`, `phase=phase-2`, etc., with outcomes and dependencies. See `note-phase-plan-light.md` for the per-phase note shape.>
 
 ## Initiatives
 
-<The initiative titles this milestone groups. Each becomes a Tusk task at `level=initiative` parented to this Milestone.>
+<The initiative titles this milestone groups. Each becomes a wbs-node at `level=initiative` parented to this Milestone via a `wbs-parent` edge.>
