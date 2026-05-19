@@ -3,6 +3,7 @@ type: wbs-note
 title: superhuman-wbs pack redesign — brainstorm
 archived: false
 kind: brainstorm
+wbs-about: wbs/superhuman-tusk-v1-migration
 ---
 
 # superhuman-wbs pack redesign — brainstorm
