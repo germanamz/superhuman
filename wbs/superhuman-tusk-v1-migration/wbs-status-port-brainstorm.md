@@ -13,15 +13,20 @@ S2 is read-only by intent: it has the lowest blast radius among the migration's 
 
 ## Edge persistence model (post-tusk#406 decision)
 
-The Tusk team has decided ([germanamz/tusk#406](https://github.com/germanamz/tusk/issues/406)) that edges intentionally stay DB-only — they are not materialized from markdown, and `tusk reindex` is not expected to recreate them. The framing: edges exist for Tusk's retrieval engine ("better information snippets"), not as human-readable graph documentation. The corresponding documentation pass in the Tusk repo clarifies this for pack authors.
+The Tusk team has decided ([germanamz/tusk#406](https://github.com/germanamz/tusk/issues/406)) to keep edge persistence DB-only. The corresponding documentation pass in Tusk clarifies the model:
 
-A follow-up Tusk feature will add **customizable ordinals** for ordered edges, which is the right answer to S1.5's priority-via-ordinality model — a clean primitive for "reorder this child" will land upstream rather than being skill-internal.
+- **Markdown is the source of content** — for both nodes *and* edges.
+- **The DB is a derived index**, deterministically rebuildable by `tusk reindex` from the markdown content. DB files are not expected to be long-lived; they will never be tracked in git.
+- The mechanism for sourcing edges from markdown today is **ref properties** (`type = "ref"` / `list-of` + `item-type = "ref"`). A ref property on a node type auto-generates a same-named edge instance per reference, materialized at reindex time.
 
-Consequences for S2 design:
+A follow-up Tusk feature will add **customizable ordinals** for ordered edges. That's the right primitive for S1.5's priority-via-ordinality model — "reorder this child" will land upstream rather than being skill-internal.
 
-- The "orphan wbs-nodes" warning (item 5 in the scope below) is **not a broken-state indicator** but an "edges-not-yet-materialized" indicator. Most common reason: fresh checkout, DB rebuild, or new workspace where `/wbs-bootstrap` (or a future edge-materialization command) hasn't run yet.
-- `/wbs-bootstrap` (already shipped in S1) will likely grow responsibility for materializing the pack's edges from some workspace-level convention. That's not S2's scope, but S2's render should hint toward it ("run /wbs-bootstrap to materialize edges" rather than implying the workspace is broken).
-- The migration spec's path-scheme open question (#2) becomes more interesting: hierarchical paths (`wbs/<project>/<child>.md`) carry the parent relationship implicitly in the filename, which is a candidate edge-materialization signal. Out of S2's scope but worth noting.
+Consequences for `superhuman-wbs` and S2:
+
+- The current pack declares `wbs-parent`, `wbs-about`, `wbs-supersedes`, and `wbs-blocks` as **standalone edge types**, not as ref properties on the node types. So edge instances enter the workspace only via imperative `tusk edge add` calls — no markdown carries them. A fresh checkout / DB rebuild starts with zero edges, which is what bit us at the top of S2. This is **the pack's design gap, not Tusk's bug.**
+- The pack-design fix is out of S2's scope. It's a sibling concern to S1.5's polish pass — convert the standalone edges to ref properties so markdown frontmatter is the source of edge truth. (`[node-types.wbs-node].properties += { name = "wbs-parent", type = "ref", to = "wbs-node" }`, etc.) Trade-off: ref properties don't carry edge attributes like `acyclic = true`, `ordered = true`, `cardinality = many-to-one`, so the strict constraints would shift to engine defaults. Worth its own brainstorm / Story.
+- The "orphan wbs-nodes" warning (item 5 in the scope below) is therefore an **"edges-not-yet-added" indicator** — not a broken-state signal and not a `/wbs-bootstrap` failure. Today the resolution is `tusk edge add`; if the pack migrates to ref properties later, the warning becomes "frontmatter is missing a parent ref" — same surface, different fix.
+- The migration spec's path-scheme open question (#2) is unaffected — hierarchical paths are a *naming* convention, separate from edge materialization. The pack-redesign question is the load-bearing piece.
 
 ## Inheritance from the migration spec
 
@@ -114,7 +119,7 @@ Six warning kinds in scope for S2:
    - The render pipeline.
 3. **Render `wbs-blocks` edges** as `BLOCKS:` / `BLOCKED-BY:` markers per node.
 4. **Surface `tusk doctor` workflow violations** inline as per-node `⚠ workflow-drift` warnings.
-5. **Surface orphan wbs-nodes** (no `wbs-parent` edge, excluding the project root) as `⚠ orphan` markers. Per the post-tusk#406 framing above, the warning text should hint at edge-materialization, not at a broken workspace — e.g. "orphan — run /wbs-bootstrap to (re)materialize edges, or `tusk edge add --type wbs-parent --source <id> --target <parent>`".
+5. **Surface orphan wbs-nodes** (no `wbs-parent` edge, excluding the project root) as `⚠ orphan` markers. Per the post-tusk#406 framing above, the warning text should hint at the pack-design reality: "orphan — wbs-parent is a standalone edge so it must be added via `tusk edge add --type wbs-parent --source <id> --target <parent>`; this is a known pack-design gap, tracked separately."
 6. **Free-form hint parsing — kept** (per Q2). Skill interprets the hint via the model and confirms the inferred filter back before rendering.
 7. **Update `task=<path>` examples** in the command docs.
 8. **MCP-preferred with CLI fallback** (per Q1). Skill probes for MCP tool availability; uses MCP when present, shells to `tusk` CLI when not.
