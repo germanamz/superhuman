@@ -11,6 +11,18 @@ Captures the design conversation for porting `/wbs-status` from Tusk v0's MCP su
 
 S2 is read-only by intent: it has the lowest blast radius among the migration's seven Stories and validates the v1 schema against a real workload before any of the create-side Stories (S3, S4) ship.
 
+## Edge persistence model (post-tusk#406 decision)
+
+The Tusk team has decided ([germanamz/tusk#406](https://github.com/germanamz/tusk/issues/406)) that edges intentionally stay DB-only — they are not materialized from markdown, and `tusk reindex` is not expected to recreate them. The framing: edges exist for Tusk's retrieval engine ("better information snippets"), not as human-readable graph documentation. The corresponding documentation pass in the Tusk repo clarifies this for pack authors.
+
+A follow-up Tusk feature will add **customizable ordinals** for ordered edges, which is the right answer to S1.5's priority-via-ordinality model — a clean primitive for "reorder this child" will land upstream rather than being skill-internal.
+
+Consequences for S2 design:
+
+- The "orphan wbs-nodes" warning (item 5 in the scope below) is **not a broken-state indicator** but an "edges-not-yet-materialized" indicator. Most common reason: fresh checkout, DB rebuild, or new workspace where `/wbs-bootstrap` (or a future edge-materialization command) hasn't run yet.
+- `/wbs-bootstrap` (already shipped in S1) will likely grow responsibility for materializing the pack's edges from some workspace-level convention. That's not S2's scope, but S2's render should hint toward it ("run /wbs-bootstrap to materialize edges" rather than implying the workspace is broken).
+- The migration spec's path-scheme open question (#2) becomes more interesting: hierarchical paths (`wbs/<project>/<child>.md`) carry the parent relationship implicitly in the filename, which is a candidate edge-materialization signal. Out of S2's scope but worth noting.
+
 ## Inheritance from the migration spec
 
 The migration spec (`wbs/superhuman-tusk-v1-migration/spec.md`) already pins the MCP mapping table for the read-side tools. Reproduced here for convenience, expanded with the S2-specific call sites in the existing `/wbs-status` command (`plugins/superhuman/commands/wbs-status.md`):
@@ -102,7 +114,7 @@ Six warning kinds in scope for S2:
    - The render pipeline.
 3. **Render `wbs-blocks` edges** as `BLOCKS:` / `BLOCKED-BY:` markers per node.
 4. **Surface `tusk doctor` workflow violations** inline as per-node `⚠ workflow-drift` warnings.
-5. **Surface orphan wbs-nodes** (no `wbs-parent` edge, excluding the project root) as `⚠ orphan` warnings.
+5. **Surface orphan wbs-nodes** (no `wbs-parent` edge, excluding the project root) as `⚠ orphan` markers. Per the post-tusk#406 framing above, the warning text should hint at edge-materialization, not at a broken workspace — e.g. "orphan — run /wbs-bootstrap to (re)materialize edges, or `tusk edge add --type wbs-parent --source <id> --target <parent>`".
 6. **Free-form hint parsing — kept** (per Q2). Skill interprets the hint via the model and confirms the inferred filter back before rendering.
 7. **Update `task=<path>` examples** in the command docs.
 8. **MCP-preferred with CLI fallback** (per Q1). Skill probes for MCP tool availability; uses MCP when present, shells to `tusk` CLI when not.
