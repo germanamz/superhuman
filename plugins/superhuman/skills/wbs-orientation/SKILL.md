@@ -23,6 +23,24 @@ Do **not** invoke in workspaces without the `superhuman-wbs` pack installed, or 
 
 Node IDs are workspace-relative paths (e.g. `wbs/<project>/<child>`), not opaque short IDs. Under Tusk v1.3.0, `tusk_edge_add` writes the edge into the source node's frontmatter and reindexes it — the edge-add *is* the wiring; there is no separate persistence step.
 
+## Semantic gate availability
+
+Three gates have a **semantic** layer that ranks nodes by `tusk_query --semantic` (cosine similarity over embeddings): the end-of-brainstorm contradiction gate (§5.7), the planning-time contradiction gate (§6.6), and reference surfacing (§10). The semantic layer requires Ollama configured under `[embeddings]` in `tusk.toml`.
+
+Before running any semantic query, determine availability:
+
+1. **Parse `tusk.toml` for an `[embeddings]` section.** If absent, embeddings are definitely not configured — skip the semantic query entirely and (once per session) emit:
+
+   > *Semantic gates are running in degraded mode — `[embeddings]` isn't configured in `tusk.toml`, so cross-workspace similarity checks are skipped. The structural checks still run. To enable the semantic layer, configure an embeddings provider (see Tusk's `[embeddings]` docs).*
+
+2. **If the section is present**, run the semantic query but **defensively catch** an availability error (Tusk returns `--semantic requires [embeddings] block in tusk.toml` when the block is missing; expect a similar error if Ollama is down or the model is missing). On that error, fall back to structural-only and emit the same hint (once per session).
+
+Rules:
+
+- The **structural checks are the hard gates** and always run. The semantic layer is strictly additive — it never replaces a structural check, only augments it. A workspace without embeddings loses nothing it had before; it just doesn't gain the semantic safety net.
+- The degraded-mode hint fires **at most once per session**. After emitting it, note that fact and suppress repeats.
+- Never block a gate on the absence of the semantic layer.
+
 ## Operating procedure
 
 ### 1. Detect Tusk context
@@ -93,10 +111,22 @@ When brainstorming a node:
 4. Update the node's description: populate the Karpathy fields with summaries from the spec, leaving deep rationale in the note. Edit the node's markdown body directly (Read + Edit the `<path-id>.md` file) — the description is the body after the frontmatter, not a property; there is no `version` field and no optimistic lock.
 5. The brainstorming skill's spec self-review and user-review gates still run, reading from the note.
 6. When brainstorming's terminal step would invoke `writing-plans`, wrap that the same way (see step 6).
-7. **End-of-brainstorm contradiction gate.** Before brainstorming creates the new `kind=spec` note, compare the proposed spec against the parent node's Karpathy fields (`Out of Scope`, `Success Criteria`). If the proposed spec contradicts the parent — for example, the new design needs a capability the parent's "Out of Scope" rules out — surface the contradiction with three choices:
+7. **End-of-brainstorm contradiction gate.** Before brainstorming creates the new `kind=spec` note, run two checks:
+
+   - **Structural (hard gate, always runs).** Compare the proposed spec against the parent node's Karpathy fields (`Out of Scope`, `Success Criteria`). If the proposed spec contradicts the parent — for example, the new design needs a capability the parent's "Out of Scope" rules out — that's a contradiction.
+   - **Semantic (additive, runs when embeddings are available — see "Semantic gate availability" below).** Surface specs anywhere in the workspace that are semantically near the proposed scope, in case a *cousin or sibling* spec (not just the parent) conflicts:
+
+     ```
+     tusk_query 'type:wbs-node AND kind:spec AND archived:false'
+       --semantic '<proposed spec: outcome + out-of-scope excerpt>' --take 5
+     ```
+
+     (Note: `kind` lives on `wbs-note`, so query `type:wbs-note AND kind:spec`; the example's `wbs-node` is shorthand — use `wbs-note`.) Present the top matches and ask the user: "Any of these conflict with what we're about to write?" This is a safety net, not a hard gate — the user judges relevance.
+
+   If either check surfaces a contradiction, offer three choices:
 
    - **(1) Reshape the parent now (pause-and-resume).** Invoke `superhuman:wbs-reshape-flow` via the Skill tool with the parent as focal node. After it completes (or aborts), re-load the now-refreshed parent context and re-evaluate whether the in-flight spec for this child still makes sense.
-   - **(2) Accept the deviation.** Post the spec as-is. Add an entry to the spec note's `## Open Questions` section: "Diverges from parent <parent-id> Out of Scope: <field>. Accepted on <YYYY-MM-DD> pending parent reshape." This becomes a forcing function for whoever later reshapes the parent.
+   - **(2) Accept the deviation.** Post the spec as-is. Add an entry to the spec note's `## Open Questions` section: "Diverges from parent <parent-path> Out of Scope: <field>. Accepted on <YYYY-MM-DD> pending parent reshape." This becomes a forcing function for whoever later reshapes the parent.
    - **(3) Abandon this brainstorm.** Discard the in-flight spec content. Reshape the parent first (offer to invoke `superhuman:wbs-reshape-flow` on the parent now), then start the child brainstorm fresh under refreshed context.
 
    Default to none — the user must pick. Do not auto-decide.
@@ -120,7 +150,7 @@ When planning a Story's implementation:
 3. Create the plan note (composite, same as step 5.3a): `tusk_node_create --type wbs-note --prop kind=plan` with the plan as body, then `tusk_edge_add --type wbs-about --source <new-note> --target <story-path>`.
 4. If the plan has phases (heavy phasing — multiple implementer subagents per task node, sequential bridge-code dependencies, etc.), `superhuman:phase-planning-rules` auto-invokes; let it drive the per-phase note shape and the 4–6 task split. Per-phase notes are `wbs-note`s with `kind=phase-plan, phase=phase-N` on the Story, following `templates/wbs/note-phase-plan-heavy.md`. After all phase-plan notes are drafted, `superhuman:phase-continuity-review` auto-invokes before any task is dispatched. After each phase's tasks are workflow-completed and after all phases ship, `superhuman:phase-post-implementation-review` auto-invokes for the per-phase gate and final sequence verification.
 5. Each task in the plan becomes a child wbs-node at `level=task` parented to the Story via `wbs-parent`, with `phase=phase-N` set if the plan is phased. Use `/wbs-new <free-form context describing the task> task=<story-path>` for each — do not bypass the command.
-6. **Planning-time contradiction gate.** Before creating the plan note, check whether the produced plan can fit the parent Initiative's stated decomposition. Specifically: does the plan require a phase, dependency, or scope element that contradicts the parent's `## Phasing`, `## Out of Scope`, or `## Tradeoffs Considered`? If so, surface the same three-choice prompt described in step 5.7, scoped to the parent of this Story's Initiative (or the nearest ancestor whose Karpathy fields are contradicted). Same defaults: user picks; never auto-decide.
+6. **Planning-time contradiction gate.** Before creating the plan note, run the same two-check shape as step 5.7: the **structural** check (does the plan require a phase, dependency, or scope element that contradicts the parent's `## Phasing`, `## Out of Scope`, or `## Tradeoffs Considered`?), plus the **semantic** cross-spec/plan search when embeddings are available (`tusk_query 'type:wbs-note AND kind:plan AND archived:false' --semantic '<plan scope excerpt>' --take 5` — surfaces sibling plans that may conflict on shared surface area). If either surfaces a contradiction, surface the same three-choice prompt described in step 5.7, scoped to the parent of this Story's Initiative (or the nearest ancestor whose Karpathy fields are contradicted). Same defaults: user picks; never auto-decide.
 
 ### 7. Enforce the Karpathy decomposition gate
 
@@ -156,14 +186,24 @@ These warnings inform; they do not block. Stop nagging once acknowledged.
 
 ### 10. Surface References
 
-At Task / Spike level, when the user is populating the `## References` section, query Tusk for likely candidates. First find the notes attached to the parent via `tusk_edge_list --to=<parent-path> --type=wbs-about`, then filter by `kind`:
+At Task / Spike level, when the user is populating the `## References` section, query Tusk for likely candidates in two groups.
+
+**Structurally nearby (always).** Find the notes attached to the parent via `tusk_edge_list --to=<parent-path> --type=wbs-about`, then filter by `kind`:
 
 - Parent's spec note (`kind=spec`).
 - Parent's plan note (`kind=plan`).
 - Phase-plan note for this task's phase (`kind=phase-plan` with `phase=<phase>`).
 - Sibling tasks in the same phase (`tusk_query 'type:wbs-node AND phase:<phase>'` intersected with `tusk_edge_list --to=<parent-path> --type=wbs-parent`).
 
-Suggest these as the user fills the References section. The user picks; do not auto-populate.
+**Semantically nearby (when embeddings are available — see "Semantic gate availability" below).** Rank all live notes by similarity to the task's description body:
+
+```
+tusk_query 'type:wbs-note AND archived:false' --semantic '<task description body>' --take 8
+```
+
+Union with the structural set, de-duplicated. Present the two groups under distinct headings ("structurally nearby" / "semantically nearby") so the user sees why each candidate surfaced.
+
+Suggest these as the user fills the References section — ideally as `[[wikilinks]]` so they materialize `references` edges. The user picks; do not auto-populate.
 
 ### 11. Wrapped reshape
 
