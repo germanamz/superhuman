@@ -11,22 +11,16 @@ Captures the design conversation for porting `/wbs-status` from Tusk v0's MCP su
 
 S2 is read-only by intent: it has the lowest blast radius among the migration's seven Stories and validates the v1 schema against a real workload before any of the create-side Stories (S3, S4) ship.
 
-## Edge persistence model (post-tusk#406 decision)
+## Edge persistence model (Tusk v1.3.0)
 
-The Tusk team has decided ([germanamz/tusk#406](https://github.com/germanamz/tusk/issues/406)) to keep edge persistence DB-only. The corresponding documentation pass in Tusk clarifies the model:
+Tusk v1.3.0 (2026-05-19) shipped frontmatter-backed edges ([#409](https://github.com/germanamz/tusk/pull/409)): `tusk edge add` and `tusk edge remove` (CLI and MCP) now write the edge into the source node's frontmatter, then reindex the source file. Edges are durable in git-tracked markdown; the DB is a regenerable derivation. The prior "edges-DB-only" framing is retired.
 
-- **Markdown is the source of content** — for both nodes *and* edges.
-- **The DB is a derived index**, deterministically rebuildable by `tusk reindex` from the markdown content. DB files are not expected to be long-lived; they will never be tracked in git.
-- The mechanism for sourcing edges from markdown today is **ref properties** (`type = "ref"` / `list-of` + `item-type = "ref"`). A ref property on a node type auto-generates a same-named edge instance per reference, materialized at reindex time.
+Two corollaries for S2:
 
-A follow-up Tusk feature will add **customizable ordinals** for ordered edges. That's the right primitive for S1.5's priority-via-ordinality model — "reorder this child" will land upstream rather than being skill-internal.
+- **Pack must be updated for v1.3.0 compatibility.** `ordered = true` on `wbs-parent` now requires a sortable `order` property on `wbs-node`; without it, every `tusk edge add` fails with a manifest validation error. The pack also benefits from declaring `hierarchy = "wbs"` on `wbs-parent` so the qualified `tree:wbs=<id>` shortcut works in S2's recursive walk (from [#407](https://github.com/germanamz/tusk/pull/407), the fix for [#405](https://github.com/germanamz/tusk/issues/405)). This pack update is tracked separately from S2; see `edge-materialization-brainstorm.md`.
+- **The orphan-wbs-nodes warning's framing changes for the third time** (this is the final form): an orphan now means *the source node's frontmatter has no parent declared*. The fix is `tusk edge add --type wbs-parent --source <id> --target <parent>` — which, in v1.3.0, writes to frontmatter and is durable. No more "this is a pack-design gap" caveat; no more "/wbs-bootstrap will rematerialize."
 
-Consequences for `superhuman-wbs` and S2:
-
-- The current pack declares `wbs-parent`, `wbs-about`, `wbs-supersedes`, and `wbs-blocks` as **standalone edge types**, not as ref properties on the node types. So edge instances enter the workspace only via imperative `tusk edge add` calls — no markdown carries them. A fresh checkout / DB rebuild starts with zero edges, which is what bit us at the top of S2. This is **the pack's design gap, not Tusk's bug.**
-- The pack-design fix is out of S2's scope. It's a sibling concern to S1.5's polish pass — convert the standalone edges to ref properties so markdown frontmatter is the source of edge truth. (`[node-types.wbs-node].properties += { name = "wbs-parent", type = "ref", to = "wbs-node" }`, etc.) Trade-off: ref properties don't carry edge attributes like `acyclic = true`, `ordered = true`, `cardinality = many-to-one`, so the strict constraints would shift to engine defaults. Worth its own brainstorm / Story.
-- The "orphan wbs-nodes" warning (item 5 in the scope below) is therefore an **"edges-not-yet-added" indicator** — not a broken-state signal and not a `/wbs-bootstrap` failure. Today the resolution is `tusk edge add`; if the pack migrates to ref properties later, the warning becomes "frontmatter is missing a parent ref" — same surface, different fix.
-- The migration spec's path-scheme open question (#2) is unaffected — hierarchical paths are a *naming* convention, separate from edge materialization. The pack-redesign question is the load-bearing piece.
+S1.5's priority-via-ordinality decision is preserved by v1.3.0's `--ordinal` flag and unchanged behavior of `ordered = true` on standalone edges. No reversal needed.
 
 ## Inheritance from the migration spec
 
