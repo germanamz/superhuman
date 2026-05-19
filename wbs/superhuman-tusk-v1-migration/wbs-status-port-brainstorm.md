@@ -3,6 +3,7 @@ type: wbs-note
 title: S2 — /wbs-status read-only port — brainstorm
 archived: false
 kind: brainstorm
+wbs-about: wbs/superhuman-tusk-v1-migration/wbs-status-readonly-port
 ---
 
 # S2 — /wbs-status read-only port — brainstorm
