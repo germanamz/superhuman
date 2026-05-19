@@ -107,10 +107,10 @@ Six warning kinds in scope for S2:
 ## S2 scope — finalized
 
 1. **Rewrite `plugins/superhuman/commands/wbs-status.md`** to drop v0 MCP tool names and reference v1's `tusk_query` / `tusk_node_get` / `tusk_edge_list` (MCP-primary surface, per Q1). Document the CLI-fallback at the bottom.
-2. **Add a new dedicated skill** at `plugins/superhuman/skills/wbs-status/SKILL.md` that owns:
-   - The recursive `wbs-parent` walk (using explicit `wbs-parent->` form until [tusk#405](https://github.com/germanamz/tusk/issues/405) lands).
-   - The %done rollup computation in-skill from descendants' statuses.
-   - The free-form hint interpretation pass with user-facing confirmation (per Q2).
+2. **Keep procedure inline in the command file** (matching wbs-bootstrap convention; Q3 reversed). The command file owns:
+   - The recursive `wbs-parent` walk. **Update:** v1.3.0 (#407) added per-edge hierarchy alias, and the pack now declares `hierarchy = "wbs"`, so the qualified shortcut `tree:wbs=<id>` works — preferred over the explicit `wbs-parent->` form.
+   - The %done rollup computation from descendants' statuses.
+   - The free-form hint interpretation with user-facing confirmation (per Q2).
    - The render pipeline.
 3. **Render `wbs-blocks` edges** as `BLOCKS:` / `BLOCKED-BY:` markers per node.
 4. **Surface `tusk doctor` workflow violations** inline as per-node `⚠ workflow-drift` warnings.
@@ -135,7 +135,7 @@ All five resolved by the user on 2026-05-17:
 
 1. **Q1 — Tool surface:** MCP-preferred with CLI fallback.
 2. **Q2 — Free-form hint parsing:** kept, model-interpreted with confirmation.
-3. **Q3 — Implementation shape:** new dedicated `wbs-status` skill at `plugins/superhuman/skills/wbs-status/SKILL.md`.
+3. **Q3 — Implementation shape:** ~~new dedicated `wbs-status` skill~~ **reversed during S2 implementation kickoff:** procedure stays inline in `plugins/superhuman/commands/wbs-status.md`, matching the `wbs-bootstrap` convention. The original Q3 framing was based on the wrong premise that the command file was a thin spec; it's actually the full procedure. `wbs-orientation` already auto-invokes on `/wbs-status` runs to provide WBS context, so the auto-invocation slot is filled — a separate `wbs-status` skill would duplicate. One source of truth.
 4. **Q4 — Warning scope:** all six warning kinds (3 carried + 3 new) confirmed.
 5. **Q5 — Pre-S2 cleanup:** repopulate the missing wbs-parent edges now via a small one-off, so S2 development has a meaningful subtree to render against.
 
