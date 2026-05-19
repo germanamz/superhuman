@@ -3,6 +3,7 @@ type: wbs-note
 title: Migration spec — Superhuman ↔ Tusk v1
 archived: false
 kind: spec
+wbs-about: wbs/superhuman-tusk-v1-migration
 ---
 
 **Status:** Draft — review pending

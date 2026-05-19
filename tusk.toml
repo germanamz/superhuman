@@ -84,6 +84,7 @@ properties = [
     { name = "level",    type = "enum", values = ["project","milestone","initiative","story","task","spike"] },
     { name = "phase",    type = "string" },
     { name = "archived", type = "bool" },
+    { name = "order",    type = "int" },
 ]
 
 [node-types.wbs-note]
@@ -102,6 +103,7 @@ cardinality = "many-to-one"
 ordered     = true
 acyclic     = true
 inverse     = "wbs-children"
+hierarchy   = "wbs"
 
 [edge-types.wbs-about]
 description = "This wbs-note is about a wbs-node"

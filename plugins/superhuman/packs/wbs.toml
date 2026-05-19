@@ -28,7 +28,18 @@
 #
 # Priority is encoded by `wbs-parent`'s `ordered = true` — re-ordering a
 # parent's child edges is the priority operation. There is intentionally
-# no separate `priority` property; reorder, don't relabel.
+# no separate `priority` property; reorder, don't relabel. The `order`
+# property on `wbs-node` is the sortable handle this ordering reads from.
+#
+# Minimum Tusk version: v1.3.0. v1.3.0 introduced two relevant changes:
+#   1. `ordered = true` on an edge type now requires a sortable property
+#      on every `from` node type (named `order` by default). Without it,
+#      `tusk edge add` fails manifest validation.
+#   2. `tusk edge add` / `tusk edge remove` write to source-node
+#      frontmatter and reindex the file. Edges are durable in git-
+#      tracked markdown; the index DB is regenerable from disk. The
+#      `hierarchy = "wbs"` alias below lets the `tree:wbs=<id>` query
+#      shortcut traverse this pack's parent edge.
 #
 # Composition matrix
 # ------------------
@@ -53,6 +64,7 @@ properties = [
     { name = "level",    type = "enum", values = ["project","milestone","initiative","story","task","spike"] },
     { name = "phase",    type = "string" },
     { name = "archived", type = "bool" },
+    { name = "order",    type = "int" },
 ]
 
 [node-types.wbs-note]
@@ -71,6 +83,7 @@ cardinality = "many-to-one"
 ordered     = true
 acyclic     = true
 inverse     = "wbs-children"
+hierarchy   = "wbs"
 
 [edge-types.wbs-about]
 description = "This wbs-note is about a wbs-node"

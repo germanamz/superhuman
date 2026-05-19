@@ -3,6 +3,7 @@ type: wbs-note
 title: Migration plan — Superhuman ↔ Tusk v1
 archived: false
 kind: plan
+wbs-about: wbs/superhuman-tusk-v1-migration
 ---
 
 # Implementation plan — Superhuman ↔ Tusk v1 migration
