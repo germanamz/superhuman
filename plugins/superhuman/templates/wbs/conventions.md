@@ -87,6 +87,23 @@ When a node is archived by reshape:
 
 Archive is reversible by deliberate user action (re-point the `wbs-parent` edge back into the live tree, transition out of `archived`). Hard delete is never required — and because everything is git-tracked markdown, the pre-archive state is recoverable from history regardless.
 
+## Retiring a completed project
+
+Archive (above) hides a node *within* the live graph — it stays queryable. **Retirement** is the opposite move for a whole finished effort: once a project node and all its descendants reach `completed` (or `archived`), delete the project's WBS tracking files from the workspace entirely.
+
+Why retire instead of leaving completed nodes in place: the WBS tracking files (project/story nodes, spec/plan/brainstorm/reshape notes) exist to coordinate *in-flight* work. Once the work ships, they stop being coordination tools and become **noise** — every future agent that queries the workspace or reindexes pays a context and relevance cost for planning data about something already done. Removing them keeps the live graph scoped to active work.
+
+The procedure, in order:
+
+1. **Mark the terminal state.** Transition the project node (and any not-yet-marked descendants) to `completed`. This records the final state in git history before removal.
+2. **Commit the completion** as its own change, so the "done" state is a discrete point in history.
+3. **Delete the project's tracking files** (`git rm -r` the project's `wbs/<project>/` subtree and its `wbs/<project>.md` node). Commit the removal.
+4. **Keep everything else.** The `superhuman-wbs` pack in `tusk.toml`, the plugin's skills/commands/templates, and any *shipped artifacts* the project produced stay — only the project's own tracking data is removed.
+
+Retirement is safe because the workspace is git-tracked: the full planning record (every node, note, reshape audit) remains recoverable from history if a future effort needs to reference how something was decided. Nothing is truly lost; it's just moved out of the live graph's default view.
+
+Distinction from archive: archive is for a *node within an active project* that no longer fits (reshape discards it but keeps the lineage queryable). Retirement is for a *whole project that's finished* (remove the coordination data; rely on git history). When in doubt mid-project, archive; only retire once the top-level effort is genuinely complete.
+
 ## Deferred reshapes
 
 When a child is reparented during a reshape but the user declines to reshape it now under its new parent, the child gets an explicit `## Open Questions` entry: "Reshape under new parent `[[<new-parent-path>]]` context — deferred from reshape `[[<reshape-note-path>]]` on <YYYY-MM-DD>." The next time the Karpathy gate runs on that child (e.g., before its decomposition or before it's brainstormed again), the open question forces resolution. Deferred reshapes are also listed in the focal node's reshape audit note.
