@@ -8,8 +8,6 @@ See @CONTRIBUTING.md for commit conventions and the release process.
 
 - `.claude-plugin/marketplace.json` — the marketplace catalog. Every installable plugin in this marketplace appears in its `plugins[]` array.
 - `plugins/<name>/` — one directory per inline plugin. Each contains its own `.claude-plugin/plugin.json` plus optional `skills/`, `commands/`, `agents/`, `hooks/` directories.
-- `docs/superpowers/specs/` — design documents.
-- `docs/superpowers/plans/` — implementation plans.
 
 ## Adding plugin content
 
