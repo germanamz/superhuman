@@ -87,6 +87,16 @@ When a node is archived by reshape:
 
 Archive is reversible by deliberate user action (re-point the `wbs-parent` edge back into the live tree, transition out of `archived`). Hard delete is never required — and because everything is git-tracked markdown, the pre-archive state is recoverable from history regardless.
 
+## Marking a node completed
+
+A node's transition to `completed` must ship as a commit **on that node's own PR** — the PR that does (or finishes) the work the node tracks. Do not defer the status bump to a follow-up change or let it ride on a sibling or later node's branch.
+
+Why this matters under **squash merge** (the common case): a PR collapses to a single commit on the default branch. If the `status=completed` change lives in the node's own PR, that squash commit records the work *and* its completion together — history correctly attributes "this node was completed by this PR." If the bump rides on a different PR, squash merge severs the link: the completion lands in an unrelated commit, the node's own PR looks like it left the work unfinished, and reconstructing what-shipped-when from history becomes guesswork.
+
+Practically: the **last commit on a node's implementation branch flips its status to `completed`** — merging the PR *is* shipping the node, so the PR should already reflect that terminal state. If the PR is abandoned instead of merged, the branch is discarded and the premature `completed` goes with it; no harm.
+
+(Anti-pattern, learned the hard way: bumping a node to `completed` on the *next* node's branch. It works functionally but decouples completion from the work in history — exactly what squash merge then erases.)
+
 ## Retiring a completed project
 
 Archive (above) hides a node *within* the live graph — it stays queryable. **Retirement** is the opposite move for a whole finished effort: once a project node and all its descendants reach `completed` (or `archived`), delete the project's WBS tracking files from the workspace entirely.
@@ -95,8 +105,8 @@ Why retire instead of leaving completed nodes in place: the WBS tracking files (
 
 The procedure, in order:
 
-1. **Mark the terminal state.** Transition the project node (and any not-yet-marked descendants) to `completed`. This records the final state in git history before removal.
-2. **Commit the completion** as its own change, so the "done" state is a discrete point in history.
+1. **Mark the terminal state.** Transition the project node (and any not-yet-marked descendants) to `completed`. Ideally the project's own completion already shipped on the final Story's PR (per "Marking a node completed" above — merging the last Story is what completes the project); this step catches any node whose completion wasn't recorded in its own PR.
+2. **Commit the completion** as its own change, so the "done" state is a discrete point in history (separate from the file-removal commit in step 3).
 3. **Delete the project's tracking files** (`git rm -r` the project's `wbs/<project>/` subtree and its `wbs/<project>.md` node). Commit the removal.
 4. **Keep everything else.** The `superhuman-wbs` pack in `tusk.toml`, the plugin's skills/commands/templates, and any *shipped artifacts* the project produced stay — only the project's own tracking data is removed.
 
