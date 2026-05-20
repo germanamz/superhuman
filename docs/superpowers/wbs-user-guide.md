@@ -1,6 +1,6 @@
 # WBS User Guide
 
-A practical walkthrough for humans using the Superhuman Work Breakdown Structure. Reference the [design spec](specs/2026-04-29-superhuman-wbs-spine-design.md) when you want the rationale; this doc is the day-to-day flow.
+A practical walkthrough for humans using the Superhuman Work Breakdown Structure. This doc is the day-to-day flow.
 
 ---
 
@@ -274,7 +274,6 @@ Tusk notes are append-only. Convention: archive the old `meta.type=spec` note, p
 | Taxonomy reference (agent-facing) | `plugins/superhuman/templates/wbs/taxonomy.md` |
 | Orchestrator skill | `plugins/superhuman/skills/wbs-orientation/SKILL.md` |
 | Slash commands | `plugins/superhuman/commands/wbs-new.md`, `wbs-status.md` |
-| Design spec (this guide's source) | `docs/superpowers/specs/2026-04-29-superhuman-wbs-spine-design.md` |
 | Roadmap | `docs/superpowers/superhuman-wbs-roadmap.md` |
 
 Tasks, descriptions, notes, annotations, status — all in Tusk. The repo holds code and these conventions; Tusk holds the work.

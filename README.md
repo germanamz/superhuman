@@ -30,8 +30,6 @@ Two patterns are supported:
 
 1. Append an entry to `plugins[]` with `source: { "type": "github", "repo": "owner/repo" }`. No in-repo files needed.
 
-See [`docs/superpowers/specs/2026-04-28-superhuman-marketplace-scaffold-design.md`](docs/superpowers/specs/2026-04-28-superhuman-marketplace-scaffold-design.md) for the full design.
-
 ## License
 
 MIT — see [LICENSE](LICENSE).

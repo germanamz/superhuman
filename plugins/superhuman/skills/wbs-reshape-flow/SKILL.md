@@ -196,7 +196,6 @@ When a node is archived as part of this reshape, apply all of the following — 
 
 ## Design references
 
-- Spec: `docs/superpowers/specs/2026-05-01-wbs-reshape-design.md`
 - Conventions: `templates/wbs/conventions.md` (sections "Reshaping", "Archive semantics", "Deferred reshapes")
 - Audit-note template: `templates/wbs/note-reshape.md`
 - Wrapped brainstorming pattern: `wbs-orientation/SKILL.md` step 5

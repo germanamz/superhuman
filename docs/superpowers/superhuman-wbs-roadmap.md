@@ -4,7 +4,7 @@ A tracker for the multi-sub-project initiative to build out the **Superhuman WBS
 
 **Initiative goal.** Take the existing scaffolding (the empty `superhuman` plugin and the three loose phase skills in `~/.claude/skills/`) and grow it into an opinionated end-to-end workflow that walks a user from a fuzzy idea down to atomic, agent-executable tasks — with note-taking, conventions, and Tusk integration along the way.
 
-This document is not a spec. Each sub-project below earns its own design spec under `docs/superpowers/specs/` and implementation plan under `docs/superpowers/plans/` when it becomes the focus.
+This document is not a spec. Each sub-project below earns its own design spec and implementation plan — captured as WBS notes in Tusk — when it becomes the focus.
 
 ---
 
@@ -14,14 +14,14 @@ Numbered for reference, not strict execution order. Order is reviewed each time 
 
 | # | Sub-project | Status | Spec | Plan |
 |---|---|---|---|---|
-| 1 | **WBS spine** — the inverted-flame decomposition model, the skill set that walks a user from wide scope to narrow scope, and the data shape of a "node" at each level | Done | [2026-04-29 spec](specs/2026-04-29-superhuman-wbs-spine-design.md) | [2026-04-29 plan](plans/2026-04-29-superhuman-wbs-spine.md) |
-| 2 | **Phase skills relocation + polish** — move the three phase skills (`phase-planning-rules`, `phase-continuity-review`, `phase-post-implementation-review`) from `~/.claude/skills/` into the `superhuman` plugin, reshape for WBS context | Done | [2026-04-30 spec](specs/2026-04-30-phase-skills-relocation-design.md) | [2026-04-30 plan](plans/2026-04-30-phase-skills-relocation.md) |
+| 1 | **WBS spine** — the inverted-flame decomposition model, the skill set that walks a user from wide scope to narrow scope, and the data shape of a "node" at each level | Done | — | — |
+| 2 | **Phase skills relocation + polish** — move the three phase skills (`phase-planning-rules`, `phase-continuity-review`, `phase-post-implementation-review`) from `~/.claude/skills/` into the `superhuman` plugin, reshape for WBS context | Done | — | — |
 | 3 | **Tusk integration** — commands, agents, and conventions for syncing WBS nodes to [Tusk](https://github.com/germanamz/tusk) for task management | Not started | — | — |
 | 4 | **Implementation pipelines** — agent-orchestrated and human-orchestrated execution patterns per task, building on the existing phase implementer model | Not started | — | — |
 | 5 | **Windowed note-taking** — capture learnings into Tusk so future agents can pull narrow, relevant context without flooding the window | Not started | — | — |
 | 6 | **Code quality conventions** — a skill (or guide) that codifies the user's standards for code quality | Not started | — | — |
 | 7 | **Software architecture conventions** — a skill (or guide) that codifies the user's standards for architecture | Not started | — | — |
-| 8 | **WBS reshape** — `/wbs-reshape` command + `wbs-reshape` skill that lets WBS authors change direction mid-flight via context-aware re-brainstorm; auto-invokes from `wbs-orientation` on contradiction gates | Done | [2026-05-01 spec](specs/2026-05-01-wbs-reshape-design.md) | [2026-05-01 plan](plans/2026-05-01-wbs-reshape.md) |
+| 8 | **WBS reshape** — `/wbs-reshape` command + `wbs-reshape` skill that lets WBS authors change direction mid-flight via context-aware re-brainstorm; auto-invokes from `wbs-orientation` on contradiction gates | Done | — | — |
 
 Sub-project #1 also ships a human-facing [user guide](wbs-user-guide.md) covering setup, the five levels, the daily decomposition flow, the slash commands, the Karpathy gate, and phasing.
 
