@@ -7,19 +7,21 @@ description: Per-phase verification gate and final sequence review for a WBS-Tus
 
 This review is performed by the planning agent — the same agent that drafted the phase-plan notes and ran the continuity review. It is the only agent that understands the reasoning behind the phase split and has visibility across the full plan.
 
-Each Tusk task is dispatched to a separate implementer subagent. While implementer subagents can read the parent Story's `spec`, `plan`, and the relevant phase-plan note via Tusk MCP, they cannot coordinate with each other or flag cross-phase issues during execution. That makes this review the only point where plan-level intent is compared against actual code across the full sequence.
+Tusk surface: MCP-preferred (`tusk_node_get`, `tusk_node_modify`, `tusk_edge_list`, `tusk_query`) with `tusk` CLI fallback. Node IDs are workspace-relative paths.
+
+Each task node is dispatched to a separate implementer subagent. While implementer subagents can read the parent Story's `spec`, `plan`, and the relevant phase-plan note, they cannot coordinate with each other or flag cross-phase issues during execution. That makes this review the only point where plan-level intent is compared against actual code across the full sequence.
 
 ### Per-Phase Verification
 
-Perform these checks after each phase's tasks are workflow-completed in Tusk, before dispatching the next phase's tasks to their implementer subagents. This is the planning agent's gate between phases — if a check fails, fix the issue before proceeding. Errors that pass this gate compound, and no downstream implementer subagent can detect or correct them.
+Perform these checks after each phase's task nodes reach `status=completed`, before dispatching the next phase's tasks to their implementer subagents. This is the planning agent's gate between phases — if a check fails, fix the issue before proceeding. Errors that pass this gate compound, and no downstream implementer subagent can detect or correct them.
 
 1. **Compilation and type-checking.**
    The codebase must compile and pass all type checks with zero errors and zero new warnings. Run the full build, not just the files the implementer touched. If the project has a strict/pedantic compiler mode, use it. A compile failure here means the next implementer subagent inherits a broken starting point.
    _Verifies: planning rule 4 (compilation safety)._
 
 2. **Task completion is literal.**
-   Walk the phase-plan note task-by-task. For each task: identify the exact code change AND confirm the corresponding Tusk task is workflow-completed. If a task in the note cannot be mapped to a concrete code change, or a Tusk task is open while the note treats it as done (or vice versa), flag the failure. Skipped tasks usually mean the phase-plan note was ambiguous — fix the note for future reference even if you fix the code now.
-   _Verifies: planning rule 2 (Tusk task description as primary directive)._
+   Walk the phase-plan note task-by-task. For each task: identify the exact code change AND confirm the corresponding task node has `status=completed`. If a task in the note cannot be mapped to a concrete code change, or a task node is still open while the note treats it as done (or vice versa), flag the failure. Skipped tasks usually mean the phase-plan note was ambiguous — fix the note for future reference even if you fix the code now.
+   _Verifies: planning rule 2 (task body as primary directive)._
 
 3. **Shippability gate.**
    The system must be deployable and functional at this point. Run the application. Verify it starts, serves traffic (or performs its core function), and does not crash. If the project has a staging environment or deploy script, execute it. "It compiles" is not the same as "it ships."
@@ -70,6 +72,6 @@ Run these checks once after all phases are implemented. This is the planning age
 
 6. **Completion seal and phase-plan archive.**
    Replaces the file-based "Plan doc cleanup" step. Two operations:
-   - **Completion seal:** Post a timestamped annotation on the Story summarizing implementation outcome — date, phases shipped, bridges resolved, normalization follow-ups (if any), and the spec/plan note IDs. This is the durable marker future agents see when first reading the Story.
-   - **Phase-plan archive:** For each `meta.type=phase-plan` note on the Story, set the archive flag via Tusk (the `meta.type=spec` and `meta.type=plan` notes stay non-archived as canonical references). Archived notes remain queryable via Tusk's archive flag but are hidden from default views — they document how the Story was implemented without cluttering future context.
-   If either operation fails for some notes/annotations, surface clearly: completion is incomplete, and a future agent reading the Story will see phase-plan notes in the default view. Manual remediation: re-run the failed operation.
+   - **Completion seal:** Create a timestamped completion-seal note on the Story (a `wbs-note`, e.g. `kind=brainstorm` or a dedicated marker, linked by a `wbs-about` edge) summarizing implementation outcome — date, phases shipped, bridges resolved, normalization follow-ups (if any), and `[[wikilinks]]` to the spec/plan notes. This is the durable marker future agents see when first reading the Story.
+   - **Phase-plan archive:** For each `kind=phase-plan` note on the Story, set `tusk_node_modify <note-path> --prop archived=true` (the `kind=spec` and `kind=plan` notes stay non-archived as canonical references). Archived notes remain queryable but are hidden from default `archived:false` views — they document how the Story was implemented without cluttering future context.
+   If either operation fails for some notes, surface clearly: completion is incomplete, and a future agent reading the Story will see phase-plan notes in the default view. Manual remediation: re-run the failed operation.

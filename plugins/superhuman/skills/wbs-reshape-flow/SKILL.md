@@ -68,7 +68,7 @@ Before asking the user any reshape questions, produce a written summary the user
 >
 > **Tradeoffs at design time:** <bullet list pulled from the spec's `## Tradeoffs Considered`>
 
-This synthesis lands as a regular assistant message — not a Tusk note — and is the shared reference frame for the rest of the flow.
+This synthesis lands as a regular assistant message — not a wbs-note — and is the shared reference frame for the rest of the flow.
 
 ### 5. Capture the trigger
 

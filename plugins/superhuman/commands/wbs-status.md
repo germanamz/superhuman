@@ -80,7 +80,7 @@ Per node, surface these markers in the render:
 | Warning | Detection | Marker |
 |---|---|---|
 | Empty Karpathy fields (design levels) | Body lacks non-empty `## Success Criteria`, `## Assumptions Made`, `## Open Questions`, `## Tradeoffs Considered`, or `## Out of Scope` | `⚠ karpathy:<field>` (one per missing field) |
-| Phase-tag / phase-plan-note mismatch | Node tagged `+phase-N` whose parent has no `wbs-note` with `kind=phase-plan, phase=phase-N` (or vice versa: phase-plan note without any tagged children) | `⚠ phase-mismatch` |
+| Phase / phase-plan-note mismatch | Node with `phase=phase-N` whose parent has no `wbs-note` with `kind=phase-plan, phase=phase-N` (or vice versa: phase-plan note without any matching children) | `⚠ phase-mismatch` |
 | Reparented stale `phase` | Node's `wbs-parent` source differs from where the `phase` property was originally written (heuristic; surface as informational) | `⚠ phase-stale` |
 | `wbs-blocks` relationships | Outgoing `wbs-blocks` and incoming `wbs-blocked-by` edges | `BLOCKS: <ids>` / `BLOCKED-BY: <ids>` lines under the node |
 | Workflow drift | Node appears in `tusk_doctor`'s `workflow-violation` list | `⚠ workflow-drift: <observed-status>` |
