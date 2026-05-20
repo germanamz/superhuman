@@ -15,7 +15,7 @@ The first command registers the marketplace. The second installs the `gilbreth` 
 
 ## Plugins in this marketplace
 
-- **`gilbreth`** — WBS-driven decomposition, planning, and phase-review skills for Tusk-backed projects. Lives at [`plugins/gilbreth/`](plugins/gilbreth/).
+- **`gilbreth`** — a guided work-breakdown workflow for Tusk-backed projects. Recursively decomposes a fuzzy idea down a fixed taxonomy (Project → Milestone → Initiative → Story → Task) into atomic, agent-ready tasks, with brainstorm → spec → plan → phase-review gates at every level. Lives at [`plugins/gilbreth/`](plugins/gilbreth/).
 
 ## Adding new plugins
 
