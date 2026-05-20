@@ -5,7 +5,7 @@ description: Re-brainstorm a WBS node with full original context and apply the r
 
 # WBS Reshape
 
-This is the reshape orchestrator skill for the Superhuman WBS spine. It is **rigid** — the order of operations below is enforced. Read `templates/wbs/conventions.md` (in the same plugin) before diverging from any step.
+This is the reshape orchestrator skill for the Gilbreth WBS spine. It is **rigid** — the order of operations below is enforced. Read `templates/wbs/conventions.md` (in the same plugin) before diverging from any step.
 
 The skill's purpose is *context-aware re-brainstorm*, not mechanical subtree editing. When a node's prior spec/plan no longer fits, this skill loads the original reasoning, captures what was learned, wraps the `brainstorming` skill with that context, and walks per-child disposition decisions (keep / reparent / archive). Reparented children whose own subtrees need reshaping recurse through this same workflow at the user's election.
 
@@ -29,8 +29,8 @@ Do **not** invoke for routine description edits, typo fixes, or phrasing changes
 
 - A project is a `wbs-node level=project`. If invoked with an explicit `task=<focal-path>` (or `project=<path>`) argument, derive the project from that node's ancestry. Otherwise query `tusk_query 'type:wbs-node AND level:project'`: use the sole project if there's one, else ask the user which (do not auto-pick).
 - Hard error if Tusk is unreachable via both MCP and CLI. Point at `/wbs-bootstrap` for setup.
-- Hard error if the `superhuman-wbs` pack isn't installed (the step-1 pack-presence check from `wbs-orientation`). Point at `/wbs-bootstrap`.
-- The `wbs-workflow` declares a terminal `archived` status — reshape archive semantics use it. (The `superhuman-wbs` pack always declares it, so this is a no-op check in practice; surface a hard error only if a workspace has somehow removed it from `tusk.toml`.)
+- Hard error if the `gilbreth-wbs` pack isn't installed (the step-1 pack-presence check from `wbs-orientation`). Point at `/wbs-bootstrap`.
+- The `wbs-workflow` declares a terminal `archived` status — reshape archive semantics use it. (The `gilbreth-wbs` pack always declares it, so this is a no-op check in practice; surface a hard error only if a workspace has somehow removed it from `tusk.toml`.)
 
 ### 2. Identify the focal node
 
@@ -163,7 +163,7 @@ If invoked explicitly via `/wbs-reshape`, control returns to the user. Print the
 
 When a node is archived as part of this reshape, apply all of the following — in this order — for each archived node:
 
-1. **Workflow transition.** Move the node to the `wbs-workflow`'s terminal `archived` status: `tusk_node_modify <node-path> --prop status=archived`. The `superhuman-wbs` pack declares `archived` as a terminal status reachable from any non-terminal state.
+1. **Workflow transition.** Move the node to the `wbs-workflow`'s terminal `archived` status: `tusk_node_modify <node-path> --prop status=archived`. The `gilbreth-wbs` pack declares `archived` as a terminal status reachable from any non-terminal state.
 2. **Description stamp.** Prepend a one-line marker to the node's body (Read + Edit), preserving original content:
 
    ```markdown
@@ -185,7 +185,7 @@ When a node is archived as part of this reshape, apply all of the following — 
 | Failure | Behavior |
 |---|---|
 | Tusk unavailable (both MCP and CLI) | Hard error in step 1. Pointer to `/wbs-bootstrap`. |
-| `superhuman-wbs` pack not installed | Hard error in step 1. Pointer to `/wbs-bootstrap`. |
+| `gilbreth-wbs` pack not installed | Hard error in step 1. Pointer to `/wbs-bootstrap`. |
 | `wbs-workflow` missing the terminal `archived` status | Hard error in step 1. Refuse to proceed (shouldn't happen with the shipped pack). |
 | Focal node has no spec note | Warn in step 3. Allow user to abort or proceed with sparse audit note. |
 | Brainstorm in step 6 doesn't converge | Allow abort. No mutations applied. No audit note posted. |

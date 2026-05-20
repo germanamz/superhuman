@@ -8,10 +8,10 @@
   },
   "plugins": [
     {
-      "name": "superhuman",
+      "name": "gilbreth",
       "version": "0.4.0",
-      "description": "Starter plugin scaffold for the superhuman marketplace",
-      "source": "./plugins/superhuman"
+      "description": "WBS-driven decomposition, planning, and phase-review skills for Tusk-backed projects",
+      "source": "./plugins/gilbreth"
     }
   ]
 }

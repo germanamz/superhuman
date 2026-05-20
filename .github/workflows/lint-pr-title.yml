@@ -31,7 +31,7 @@ jobs:
             revert
           scopes: |
             marketplace
-            superhuman
+            gilbreth
           requireScope: false
           subjectPattern: ^(?![A-Z]).+$
           subjectPatternError: |

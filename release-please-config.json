@@ -34,11 +34,11 @@
         }
       ]
     },
-    "plugins/superhuman": {
-      "component": "superhuman",
-      "package-name": "superhuman",
+    "plugins/gilbreth": {
+      "component": "gilbreth",
+      "package-name": "gilbreth",
       "changelog-path": "CHANGELOG.md",
-      "pull-request-title-pattern": "chore(superhuman): release ${version}",
+      "pull-request-title-pattern": "chore(gilbreth): release ${version}",
       "extra-files": [
         {
           "type": "json",
@@ -48,7 +48,7 @@
         {
           "type": "json",
           "path": "/.claude-plugin/marketplace.json",
-          "jsonpath": "$.plugins[?(@.name==\"superhuman\")].version"
+          "jsonpath": "$.plugins[?(@.name==\"gilbreth\")].version"
         }
       ]
     }

@@ -1,4 +1,4 @@
-# superhuman
+# gilbreth
 
 The flagship plugin of the [superhuman](../../README.md) marketplace. It packages the WBS (work-breakdown-structure) workflow that drives decomposition, planning, and phase review on Tusk-backed projects.
 

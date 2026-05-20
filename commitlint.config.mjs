@@ -8,6 +8,6 @@
 export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
-    'scope-enum': [2, 'always', ['marketplace', 'superhuman']],
+    'scope-enum': [2, 'always', ['marketplace', 'gilbreth']],
   },
 };

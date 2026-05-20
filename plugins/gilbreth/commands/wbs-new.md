@@ -29,7 +29,7 @@ A single free-form text argument describing what to create. The command extracts
 
 2. **Resolve the active project.** A project is a `wbs-node level=project` — query `tusk_query 'type:wbs-node AND level:project'`. If `task=<parent-path>` was passed, derive the project from that node's ancestry. If exactly one project exists, use it. If more than one exists and none is implied, ask the user which to work in. If no project exists, hard error pointing at `/wbs-bootstrap`.
 
-3. **Confirm the pack is present.** `tusk_node_list type=wbs-node` must succeed (the level enum and `wbs-parent` edge come from the `superhuman-wbs` pack). If it errors with an unknown-type response, hard error pointing at `/wbs-bootstrap`.
+3. **Confirm the pack is present.** `tusk_node_list type=wbs-node` must succeed (the level enum and `wbs-parent` edge come from the `gilbreth-wbs` pack). If it errors with an unknown-type response, hard error pointing at `/wbs-bootstrap`.
 
 4. **Infer the level** from the free-form context. If no clear cue, ask the user. Confirm the level is one of the pack's declared values (`project / milestone / initiative / story / task / spike`).
 
@@ -43,7 +43,7 @@ A single free-form text argument describing what to create. The command extracts
 
 7. **Infer the title** from the free-form context. If ambiguous (input is descriptive without a clear title phrase), ask the user. Confirm before creation when not obvious.
 
-8. **Load the description template.** Read `plugins/superhuman/templates/wbs/desc-<level>.md` from the plugin. Replace `<*-title>` placeholders with the resolved title. Hand the residual free-form context to the orchestrator as the brainstorming seed.
+8. **Load the description template.** Read `plugins/gilbreth/templates/wbs/desc-<level>.md` from the plugin. Replace `<*-title>` placeholders with the resolved title. Hand the residual free-form context to the orchestrator as the brainstorming seed.
 
 9. **Create the node (composite).** Two steps, in order:
    - `tusk_node_create --type wbs-node --path wbs/<project>/<slug>.md --prop level=<inferred-level>` with the populated template content as the body, and `--title <resolved-title>`.
@@ -54,7 +54,7 @@ A single free-form text argument describing what to create. The command extracts
 ## Errors
 
 - **Tusk unavailable (both MCP and CLI)** — hard error with remediation pointer (`/wbs-bootstrap`). Do not fall back to file-based design.
-- **`superhuman-wbs` pack not installed** — hard error pointing at `/wbs-bootstrap`.
+- **`gilbreth-wbs` pack not installed** — hard error pointing at `/wbs-bootstrap`.
 - **No project node exists** — hard error: run `/wbs-bootstrap` then `/wbs-new create a project for <…>`.
 - **Level cannot be inferred and the user can't disambiguate** — hard error.
 - **Invalid level / rank-parent mismatch** — surface Tusk's validation error verbatim.

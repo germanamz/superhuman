@@ -1,8 +1,8 @@
-# Superhuman WBS — Roadmap
+# Gilbreth WBS — Roadmap
 
-A tracker for the multi-sub-project initiative to build out the **Superhuman WBS**: a coherent set of skills, agents, and commands that improve how user + agent collaborate on software work, organised around an inverted-flame Work Breakdown Structure.
+A tracker for the multi-sub-project initiative to build out the **Gilbreth WBS**: a coherent set of skills, agents, and commands that improve how user + agent collaborate on software work, organised around an inverted-flame Work Breakdown Structure.
 
-**Initiative goal.** Take the existing scaffolding (the empty `superhuman` plugin and the three loose phase skills in `~/.claude/skills/`) and grow it into an opinionated end-to-end workflow that walks a user from a fuzzy idea down to atomic, agent-executable tasks — with note-taking, conventions, and Tusk integration along the way.
+**Initiative goal.** Take the existing scaffolding (the empty `gilbreth` plugin and the three loose phase skills in `~/.claude/skills/`) and grow it into an opinionated end-to-end workflow that walks a user from a fuzzy idea down to atomic, agent-executable tasks — with note-taking, conventions, and Tusk integration along the way.
 
 This document is not a spec. Each sub-project below earns its own design spec and implementation plan — captured as WBS notes in Tusk — when it becomes the focus.
 
@@ -15,7 +15,7 @@ Numbered for reference, not strict execution order. Order is reviewed each time 
 | # | Sub-project | Status | Spec | Plan |
 |---|---|---|---|---|
 | 1 | **WBS spine** — the inverted-flame decomposition model, the skill set that walks a user from wide scope to narrow scope, and the data shape of a "node" at each level | Done | — | — |
-| 2 | **Phase skills relocation + polish** — move the three phase skills (`phase-planning-rules`, `phase-continuity-review`, `phase-post-implementation-review`) from `~/.claude/skills/` into the `superhuman` plugin, reshape for WBS context | Done | — | — |
+| 2 | **Phase skills relocation + polish** — move the three phase skills (`phase-planning-rules`, `phase-continuity-review`, `phase-post-implementation-review`) from `~/.claude/skills/` into the `gilbreth` plugin, reshape for WBS context | Done | — | — |
 | 3 | **Tusk integration** — commands, agents, and conventions for syncing WBS nodes to [Tusk](https://github.com/germanamz/tusk) for task management | Not started | — | — |
 | 4 | **Implementation pipelines** — agent-orchestrated and human-orchestrated execution patterns per task, building on the existing phase implementer model | Not started | — | — |
 | 5 | **Windowed note-taking** — capture learnings into Tusk so future agents can pull narrow, relevant context without flooding the window | Not started | — | — |

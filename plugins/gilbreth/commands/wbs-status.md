@@ -15,7 +15,7 @@ Optional free-form text. The model interprets hints in natural language ("only s
 
 ## Keyword parameters
 
-- `task=<path-id>` (optional) — Tusk node path (e.g., `wbs/superhuman-tusk-v1-migration/wbs-pack-polish`). Defaults to the current node context maintained by `wbs-orientation`, or the project root if no context exists.
+- `task=<path-id>` (optional) — Tusk node path (e.g., `wbs/cli-v2-migration/wbs-pack-polish`). Defaults to the current node context maintained by `wbs-orientation`, or the project root if no context exists.
 
 `project=<id>` is **no longer supported** — under Tusk v1 a project is a `wbs-node` like any other, addressable by path through `task=<path-id>`.
 
@@ -93,8 +93,8 @@ Per node, surface these markers in the render:
 One node per line, indented by depth from the root:
 
 ```
-[story]    wbs/superhuman-tusk-v1-migration/wbs-pack-polish  S1.5 — wbs-pack polish    [completed]   100% done
-[story]    wbs/superhuman-tusk-v1-migration/wbs-status-readonly-port  S2 — wbs-status read-only port  [in-progress]  40% done  ⚠ karpathy:Success Criteria  BLOCKED-BY: wbs/superhuman-tusk-v1-migration/wbs-pack-polish
+[story]    wbs/cli-v2-migration/wbs-pack-polish  S1.5 — wbs-pack polish    [completed]   100% done
+[story]    wbs/cli-v2-migration/wbs-status-readonly-port  S2 — wbs-status read-only port  [in-progress]  40% done  ⚠ karpathy:Success Criteria  BLOCKED-BY: wbs/cli-v2-migration/wbs-pack-polish
 ```
 
 Columns: level in brackets, path id, title, status in brackets, %done (when applicable), inline warning markers, then `BLOCKS:` / `BLOCKED-BY:` lines on continuation rows.
@@ -116,16 +116,16 @@ After the tree, print a legend showing the warning symbols and their meanings, p
 /wbs-status
 # Renders the active project from the root.
 
-/wbs-status task=wbs/superhuman-tusk-v1-migration
+/wbs-status task=wbs/cli-v2-migration
 # Renders the migration project's subtree.
 
-/wbs-status task=wbs/superhuman-tusk-v1-migration depth 2
+/wbs-status task=wbs/cli-v2-migration depth 2
 # Free-form depth hint; the renderer infers --depth=2 and confirms before rendering.
 
 /wbs-status only show in-progress
 # Status filter; inferred from the hint and confirmed before rendering.
 
-/wbs-status task=wbs/superhuman-tusk-v1-migration/wbs-status-readonly-port phase-1 children only
+/wbs-status task=wbs/cli-v2-migration/wbs-status-readonly-port phase-1 children only
 # Combined task scope + phase filter.
 ```
 

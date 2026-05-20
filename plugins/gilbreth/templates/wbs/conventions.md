@@ -78,7 +78,7 @@ Use `/wbs-reshape <free-form trigger context> task=<focal-path>` to invoke expli
 
 When a node is archived by reshape:
 
-- It transitions to the `wbs-workflow`'s terminal `archived` status. The `superhuman-wbs` pack declares it; reshape refuses to proceed if it's somehow absent.
+- It transitions to the `wbs-workflow`'s terminal `archived` status. The `gilbreth-wbs` pack declares it; reshape refuses to proceed if it's somehow absent.
 - The `status=archived` *is* the archive marker — there is no separate tag (reshape-archive and user cancellation both land in the same terminal state; the reshape-audit note records the provenance).
 - Its body is prepended with a one-line stamp pointing at the reshape note: `> **Archived by reshape on <YYYY-MM-DD>.** See reshape note [[<reshape-note-path>]] on [[<focal-node-path>]].` — original content preserved below.
 - All non-archived notes on the node are archived (`archived=true` property).
@@ -108,7 +108,7 @@ The procedure, in order:
 1. **Mark the terminal state.** Transition the project node (and any not-yet-marked descendants) to `completed`. Ideally the project's own completion already shipped on the final Story's PR (per "Marking a node completed" above — merging the last Story is what completes the project); this step catches any node whose completion wasn't recorded in its own PR.
 2. **Commit the completion** as its own change, so the "done" state is a discrete point in history (separate from the file-removal commit in step 3).
 3. **Delete the project's tracking files** (`git rm -r` the project's `wbs/<project>/` subtree and its `wbs/<project>.md` node). Commit the removal.
-4. **Keep everything else.** The `superhuman-wbs` pack in `tusk.toml`, the plugin's skills/commands/templates, and any *shipped artifacts* the project produced stay — only the project's own tracking data is removed.
+4. **Keep everything else.** The `gilbreth-wbs` pack in `tusk.toml`, the plugin's skills/commands/templates, and any *shipped artifacts* the project produced stay — only the project's own tracking data is removed.
 
 Retirement is safe because the workspace is git-tracked: the full planning record (every node, note, reshape audit) remains recoverable from history if a future effort needs to reference how something was decided. Nothing is truly lost; it's just moved out of the live graph's default view.
 

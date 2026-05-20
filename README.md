@@ -8,14 +8,14 @@ In Claude Code:
 
 ```
 /plugin marketplace add germanamz/superhuman
-/plugin install superhuman@superhuman
+/plugin install gilbreth@superhuman
 ```
 
-The first command registers the marketplace. The second installs the `superhuman` plugin from it. The `<plugin>@<marketplace>` syntax disambiguates when multiple marketplaces ship a plugin with the same name.
+The first command registers the marketplace. The second installs the `gilbreth` plugin from it. The `<plugin>@<marketplace>` syntax disambiguates when multiple marketplaces ship a plugin with the same name.
 
 ## Plugins in this marketplace
 
-- **`superhuman`** — starter plugin scaffold. Lives at [`plugins/superhuman/`](plugins/superhuman/).
+- **`gilbreth`** — WBS-driven decomposition, planning, and phase-review skills for Tusk-backed projects. Lives at [`plugins/gilbreth/`](plugins/gilbreth/).
 
 ## Adding new plugins
 
