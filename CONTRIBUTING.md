@@ -21,7 +21,7 @@ Every commit must follow Conventional Commits with a mandatory scope:
 <type>(<scope>): <subject>
 ```
 
-`<scope>` must be a registered component name — `marketplace`, or any plugin's component name (e.g. `superhuman`).
+`<scope>` must be a registered component name — `marketplace`, or any plugin's component name (e.g. `gilbreth`).
 
 | Commit | Effect on `<scope>` component |
 |---|---|
@@ -49,7 +49,7 @@ A commit's scope routes it to **exactly one** component. release-please does not
 Add a `Release-As: x.y.z` footer to a commit to override automatic bumping for that component's next release. Useful for `1.0.0` promotion or hotfix versioning:
 
 ```
-feat(superhuman): promote to stable
+feat(gilbreth): promote to stable
 
 Release-As: 1.0.0
 ```

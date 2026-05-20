@@ -5,7 +5,7 @@ description: Use when working in any WBS context — running /wbs-new or /wbs-st
 
 # WBS Orientation
 
-This is the orchestrator skill for the Superhuman WBS spine. It is **rigid** — the order of operations below is enforced. Read `templates/wbs/conventions.md` (in the same plugin) before diverging from any step.
+This is the orchestrator skill for the Gilbreth WBS spine. It is **rigid** — the order of operations below is enforced. Read `templates/wbs/conventions.md` (in the same plugin) before diverging from any step.
 
 ## When to invoke
 
@@ -15,7 +15,7 @@ Auto-invoke when ANY of the following is true:
 - The user references a WBS node at any taxonomy level (project / milestone / initiative / story / task / spike) by path ID, title, or context.
 - The user describes WBS-shaped work: "let's design milestone X", "break this initiative down", "plan the story for Y", "what's still open on this milestone", etc.
 
-Do **not** invoke in workspaces without the `superhuman-wbs` pack installed, or for non-Tusk file-based design work.
+Do **not** invoke in workspaces without the `gilbreth-wbs` pack installed, or for non-Tusk file-based design work.
 
 ## Tool surface
 
@@ -45,9 +45,9 @@ Rules:
 
 ### 1. Detect Tusk context
 
-- **Pack-presence check (Tusk v1).** Before anything else, verify the `superhuman-wbs` pack is installed in the active workspace. Probe with `tusk_node_list type=wbs-node`: an error indicating the type is undeclared (or an explicit "unknown node type" response) means the pack isn't loaded. When that happens, surface this hint and abort the current operation — do not fall back, do not attempt repair:
+- **Pack-presence check (Tusk v1).** Before anything else, verify the `gilbreth-wbs` pack is installed in the active workspace. Probe with `tusk_node_list type=wbs-node`: an error indicating the type is undeclared (or an explicit "unknown node type" response) means the pack isn't loaded. When that happens, surface this hint and abort the current operation — do not fall back, do not attempt repair:
 
-  > The `superhuman-wbs` pack isn't installed in this workspace. Run `/wbs-bootstrap` to initialize Tusk and add the pack, then re-run what you were doing.
+  > The `gilbreth-wbs` pack isn't installed in this workspace. Run `/wbs-bootstrap` to initialize Tusk and add the pack, then re-run what you were doing.
 
   This is the only intervention this skill does about workspace setup — `/wbs-bootstrap` owns the actual mutation. If `tusk_node_list type=wbs-node` succeeds (even with zero rows), the pack is present; continue.
 - **Resolve the active project.** A project is a `wbs-node` with `level=project` — there is no separate project concept under Tusk v1, and the taxonomy is workspace-wide (declared in `tusk.toml` by the pack), not per-project. Query the projects:
@@ -125,9 +125,9 @@ When brainstorming a node:
 
    If either check surfaces a contradiction, offer three choices:
 
-   - **(1) Reshape the parent now (pause-and-resume).** Invoke `superhuman:wbs-reshape-flow` via the Skill tool with the parent as focal node. After it completes (or aborts), re-load the now-refreshed parent context and re-evaluate whether the in-flight spec for this child still makes sense.
+   - **(1) Reshape the parent now (pause-and-resume).** Invoke `gilbreth:wbs-reshape-flow` via the Skill tool with the parent as focal node. After it completes (or aborts), re-load the now-refreshed parent context and re-evaluate whether the in-flight spec for this child still makes sense.
    - **(2) Accept the deviation.** Post the spec as-is. Add an entry to the spec note's `## Open Questions` section: "Diverges from parent <parent-path> Out of Scope: <field>. Accepted on <YYYY-MM-DD> pending parent reshape." This becomes a forcing function for whoever later reshapes the parent.
-   - **(3) Abandon this brainstorm.** Discard the in-flight spec content. Reshape the parent first (offer to invoke `superhuman:wbs-reshape-flow` on the parent now), then start the child brainstorm fresh under refreshed context.
+   - **(3) Abandon this brainstorm.** Discard the in-flight spec content. Reshape the parent first (offer to invoke `gilbreth:wbs-reshape-flow` on the parent now), then start the child brainstorm fresh under refreshed context.
 
    Default to none — the user must pick. Do not auto-decide.
 
@@ -148,7 +148,7 @@ When planning a Story's implementation:
    - The directive that the plan output must land as a `wbs-note` with `kind=plan`, not as `docs/superpowers/plans/<file>.md`.
 2. Let writing-plans produce the plan content.
 3. Create the plan note (composite, same as step 5.3a): `tusk_node_create --type wbs-note --prop kind=plan` with the plan as body, then `tusk_edge_add --type wbs-about --source <new-note> --target <story-path>`.
-4. If the plan has phases (heavy phasing — multiple implementer subagents per task node, sequential bridge-code dependencies, etc.), `superhuman:phase-planning-rules` auto-invokes; let it drive the per-phase note shape and the 4–6 task split. Per-phase notes are `wbs-note`s with `kind=phase-plan, phase=phase-N` on the Story, following `templates/wbs/note-phase-plan-heavy.md`. After all phase-plan notes are drafted, `superhuman:phase-continuity-review` auto-invokes before any task is dispatched. After each phase's tasks are workflow-completed and after all phases ship, `superhuman:phase-post-implementation-review` auto-invokes for the per-phase gate and final sequence verification.
+4. If the plan has phases (heavy phasing — multiple implementer subagents per task node, sequential bridge-code dependencies, etc.), `gilbreth:phase-planning-rules` auto-invokes; let it drive the per-phase note shape and the 4–6 task split. Per-phase notes are `wbs-note`s with `kind=phase-plan, phase=phase-N` on the Story, following `templates/wbs/note-phase-plan-heavy.md`. After all phase-plan notes are drafted, `gilbreth:phase-continuity-review` auto-invokes before any task is dispatched. After each phase's tasks are workflow-completed and after all phases ship, `gilbreth:phase-post-implementation-review` auto-invokes for the per-phase gate and final sequence verification.
 5. Each task in the plan becomes a child wbs-node at `level=task` parented to the Story via `wbs-parent`, with `phase=phase-N` set if the plan is phased. Use `/wbs-new <free-form context describing the task> task=<story-path>` for each — do not bypass the command.
 6. **Planning-time contradiction gate.** Before creating the plan note, run the same two-check shape as step 5.7: the **structural** check (does the plan require a phase, dependency, or scope element that contradicts the parent's `## Phasing`, `## Out of Scope`, or `## Tradeoffs Considered`?), plus the **semantic** cross-spec/plan search when embeddings are available (`tusk_query 'type:wbs-note AND kind:plan AND archived:false' --semantic '<plan scope excerpt>' --take 5` — surfaces sibling plans that may conflict on shared surface area). If either surfaces a contradiction, surface the same three-choice prompt described in step 5.7, scoped to the parent of this Story's Initiative (or the nearest ancestor whose Karpathy fields are contradicted). Same defaults: user picks; never auto-decide.
 
@@ -209,8 +209,8 @@ Suggest these as the user fills the References section — ideally as `[[wikilin
 
 When reshaping a node — explicit `/wbs-reshape` invocation, or one of the gate-driven offers from steps 5.7 / 6.6 / 7:
 
-1. Invoke the `superhuman:wbs-reshape-flow` skill via the Skill tool, passing the focal node's path ID and (if the trigger surfaced one) the contradicting parent context.
-2. The reshape skill drives its own loop — context load, trigger capture, wrapped brainstorming, per-child disposition, mutation, audit note. See `plugins/superhuman/skills/wbs-reshape-flow/SKILL.md`.
+1. Invoke the `gilbreth:wbs-reshape-flow` skill via the Skill tool, passing the focal node's path ID and (if the trigger surfaced one) the contradicting parent context.
+2. The reshape skill drives its own loop — context load, trigger capture, wrapped brainstorming, per-child disposition, mutation, audit note. See `plugins/gilbreth/skills/wbs-reshape-flow/SKILL.md`.
 3. When reshape completes, it returns a structured summary (focal node path, new spec note path, audit note path, disposition list, gate-pass flag).
 4. **If reshape was invoked from step 5.7 or 6.6 (pause-and-resume)**: reload the now-refreshed parent context. Re-display the in-flight child spec or plan. Ask the user: "Parent context has been reshaped. Does the in-flight content for this child still make sense, or do you want to revise?" Revise → restart the child's wrapped brainstorming/writing-plans flow with refreshed context. Keep → proceed to commit.
 5. **If reshape was invoked from step 7 (gate failure)**: re-run the Karpathy gate on the original child node. If it now passes, proceed with decomposition transition. If it still fails for an unrelated reason, surface that.
@@ -221,7 +221,7 @@ When reshaping a node — explicit `/wbs-reshape` invocation, or one of the gate
 | Failure | Behavior |
 |---|---|
 | Tusk unavailable (both MCP and CLI) | Hard error. Point at `/wbs-bootstrap` for setup. No file-based fallback. |
-| `superhuman-wbs` pack not installed | Hard error from the step-1 pack-presence check. Point at `/wbs-bootstrap`. |
+| `gilbreth-wbs` pack not installed | Hard error from the step-1 pack-presence check. Point at `/wbs-bootstrap`. |
 | Skipping ranks (Story directly under Project) | Allow but warn. |
 | Reparenting | Allow. Notes follow the node via their `wbs-about` edge; flag the `phase` property as a manual concern. |
 | Karpathy gate fails | Refuse to decompose. Name missing fields. Offer to walk through filling them. Never auto-fill. |

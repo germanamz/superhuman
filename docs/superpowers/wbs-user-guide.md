@@ -29,7 +29,7 @@ There is no separate UI. Everything happens in your Claude Code session against 
 1. **Install the plugin.** From any Claude Code session:
    ```
    /plugin marketplace add /path/to/this/repo
-   /plugin install superhuman@superhuman
+   /plugin install gilbreth@superhuman
    ```
    Confirm `/wbs-new` and `/wbs-status` appear in the slash-command list, and `wbs-orientation` appears in the skill registry.
 
@@ -38,7 +38,7 @@ There is no separate UI. Everything happens in your Claude Code session against 
    claude mcp add tusk -- tusk mcp serve
    ```
 
-3. **Apply the WBS taxonomy.** Either workspace-wide or per-project. The full snippet is in [`plugins/superhuman/templates/wbs/taxonomy.md`](../../plugins/superhuman/templates/wbs/taxonomy.md). Workspace-wide:
+3. **Apply the WBS taxonomy.** Either workspace-wide or per-project. The full snippet is in [`plugins/gilbreth/templates/wbs/taxonomy.md`](../../plugins/gilbreth/templates/wbs/taxonomy.md). Workspace-wide:
    ```toml
    # ~/.config/tusk/config.toml or project-root tusk.toml
    [settings.taxonomy]
@@ -268,13 +268,13 @@ Tusk notes are append-only. Convention: archive the old `meta.type=spec` note, p
 
 | What | Where |
 |---|---|
-| Description templates per level | `plugins/superhuman/templates/wbs/desc-*.md` |
-| Note templates (brainstorm, spec, plan, phase plans) | `plugins/superhuman/templates/wbs/note-*.md` |
-| Conventions reference (agent-facing) | `plugins/superhuman/templates/wbs/conventions.md` |
-| Taxonomy reference (agent-facing) | `plugins/superhuman/templates/wbs/taxonomy.md` |
-| Orchestrator skill | `plugins/superhuman/skills/wbs-orientation/SKILL.md` |
-| Slash commands | `plugins/superhuman/commands/wbs-new.md`, `wbs-status.md` |
-| Roadmap | `docs/superpowers/superhuman-wbs-roadmap.md` |
+| Description templates per level | `plugins/gilbreth/templates/wbs/desc-*.md` |
+| Note templates (brainstorm, spec, plan, phase plans) | `plugins/gilbreth/templates/wbs/note-*.md` |
+| Conventions reference (agent-facing) | `plugins/gilbreth/templates/wbs/conventions.md` |
+| Taxonomy reference (agent-facing) | `plugins/gilbreth/templates/wbs/taxonomy.md` |
+| Orchestrator skill | `plugins/gilbreth/skills/wbs-orientation/SKILL.md` |
+| Slash commands | `plugins/gilbreth/commands/wbs-new.md`, `wbs-status.md` |
+| Roadmap | `docs/superpowers/gilbreth-wbs-roadmap.md` |
 
 Tasks, descriptions, notes, annotations, status — all in Tusk. The repo holds code and these conventions; Tusk holds the work.
 
