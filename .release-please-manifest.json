@@ -1,5 +1,5 @@
 {
   ".": "1.0.0",
-  "plugins/gilbreth": "0.4.0",
+  "plugins/gilbreth": "1.0.0",
   "plugins/elephant": "1.0.0"
 }
