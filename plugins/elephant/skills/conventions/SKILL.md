@@ -5,7 +5,7 @@ description: Use whenever about to read or write a Tusk knowledge graph — crea
 
 # Conventions
 
-This is the graph-hygiene rulebook for the `knowledge` pack — generic across all project types. `capture`, `recall`, and gilbreth build on these rules — read this first whenever you touch a Tusk knowledge graph.
+This is the graph-hygiene rulebook for the `knowledge` pack — generic across all project types. `capture`, `recall`, and gilbreth all build on these rules — read this first whenever you touch a Tusk knowledge graph.
 
 ## Windowed memory
 
@@ -21,7 +21,7 @@ Every `note` should capture exactly one idea. Choose `kind` by the nature of tha
 
 - `learning` — a durable, non-obvious finding: something you learned that would surprise the agent on a cold read. Not ephemeral state; something worth knowing next session.
 - `decision` — a choice that was made, plus its rationale. Records not just *what* was decided but *why*, so it isn't re-litigated.
-- `open-thread` — an unresolved question or loose end. Exists to prevent forgetting; resolved by archiving it (with a note on how it closed) or superseding it with a `learning` or `decision`.
+- `open-thread` — an unresolved question or loose end. Exists to prevent forgetting. Resolve an open-thread by **archiving it** if it simply closed, or **superseding it** with a `learning`/`decision` when the resolution is itself worth keeping.
 - `checkpoint` — a "where I left off / start here next" summary, written at a natural work boundary (end of session, end of a phase). Orients the next agent picking up the thread.
 
 When in doubt: if it's a fact you learned, `learning`; if it's a fork you chose, `decision`; if it's still open, `open-thread`; if it's a handoff marker, `checkpoint`.
