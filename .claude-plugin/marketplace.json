@@ -1,6 +1,6 @@
 {
   "name": "superhuman",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "German's personal Claude Code marketplace",
   "owner": {
     "name": "German Meza",
@@ -12,6 +12,12 @@
       "version": "0.4.0",
       "description": "A guided work-breakdown workflow for Tusk-backed projects: recursively decomposes a fuzzy idea down a fixed taxonomy (Project → Milestone → Initiative → Story → Task) into atomic, agent-ready tasks, with brainstorm → spec → plan → phase-review gates at every level",
       "source": "./plugins/gilbreth"
+    },
+    {
+      "name": "elephant",
+      "version": "0.0.0",
+      "description": "Makes Tusk the agent's short-to-medium-term memory keeper: capture learnings broadly into a knowledge graph and recall them narrowly across sessions.",
+      "source": "./plugins/elephant"
     }
   ]
 }
