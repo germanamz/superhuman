@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.0](https://github.com/germanamz/superhuman/compare/marketplace-v0.3.0...marketplace-v1.0.0) (2026-05-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **marketplace:** the plugin install id changes from superhuman@superhuman to gilbreth@superhuman.
+
+### Features
+
+* **elephant:** scaffold elephant plugin with knowledge pack ([#44](https://github.com/germanamz/superhuman/issues/44)) ([f421b79](https://github.com/germanamz/superhuman/commit/f421b7998ad9ae1066135480c634fe2d256731aa))
+* **marketplace:** register elephant plugin ([#46](https://github.com/germanamz/superhuman/issues/46)) ([0c07e6f](https://github.com/germanamz/superhuman/commit/0c07e6feea44d939be31eb58c69602b2b9819c09))
+* **marketplace:** rename superhuman plugin to gilbreth ([#39](https://github.com/germanamz/superhuman/issues/39)) ([4e30f8f](https://github.com/germanamz/superhuman/commit/4e30f8f3d4d1253961de3108f296617ab1edc0f9))
+
+
+### Documentation
+
+* **gilbreth:** add Elephant and Researcher, consolidate WBS roadmap ([#42](https://github.com/germanamz/superhuman/issues/42)) ([5083e47](https://github.com/germanamz/superhuman/commit/5083e47445ae7be1bae82c54eea717cfb7c966e1))
+* **gilbreth:** seed Elephant initiative in WBS ([#43](https://github.com/germanamz/superhuman/issues/43)) ([c868155](https://github.com/germanamz/superhuman/commit/c868155e0173eb4851b5421feb598ca1b95cd42f))
+
 ## [0.3.0](https://github.com/germanamz/superhuman/compare/marketplace-v0.2.0...marketplace-v0.3.0) (2026-05-20)
 
 
