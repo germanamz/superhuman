@@ -32,6 +32,7 @@ jobs:
           scopes: |
             marketplace
             gilbreth
+            elephant
           requireScope: false
           subjectPattern: ^(?![A-Z]).+$
           subjectPatternError: |

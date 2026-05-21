@@ -51,6 +51,24 @@
           "jsonpath": "$.plugins[?(@.name==\"gilbreth\")].version"
         }
       ]
+    },
+    "plugins/elephant": {
+      "component": "elephant",
+      "package-name": "elephant",
+      "changelog-path": "CHANGELOG.md",
+      "pull-request-title-pattern": "chore(elephant): release ${version}",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": ".claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "/.claude-plugin/marketplace.json",
+          "jsonpath": "$.plugins[?(@.name==\"elephant\")].version"
+        }
+      ]
     }
   }
 }
