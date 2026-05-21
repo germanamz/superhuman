@@ -3,7 +3,7 @@ type: wbs-node
 title: Knowledge pack + /bootstrap + availability check
 order: 0
 level: story
-status: in-progress
+status: completed
 ---
 
 # Knowledge pack + /bootstrap + availability check
