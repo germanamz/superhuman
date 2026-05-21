@@ -19,19 +19,19 @@ Optional free-form text. Recognized keyword params:
 
 1. **Detect existing workspace.** Run `tusk status`. If it succeeds, skip step 2 with a soft note: "Tusk workspace already initialized at <root>." If it fails because no workspace was found, continue.
 
-2. **Initialize the workspace.** Run `tusk init --name <name>` (`<name>` = the `name=` keyword if supplied, else `$(basename "$PWD")`). Hard error on failure. Ensure `.tusk/` is gitignored — append a `.tusk/` line to `.gitignore` if absent.
+2. **Initialize the workspace.** Run `tusk init --name <name>` (`<name>` = the `name=` keyword if supplied, else `$(basename "$PWD")`). Hard error on failure. Ensure `.tusk/` is gitignored — append a `.tusk/` line to `.gitignore` if absent (`tusk init` does this itself in fresh repos; the check is for repos whose `.gitignore` predates it).
 
 3. **Add the tags pack.** Run `tusk pack add tags`. Idempotent; surface stderr verbatim on failure.
 
 4. **Detect existing knowledge pack.** Read `tusk.toml`; if `[node-types.note]` is present, skip step 5 with a soft note: "knowledge pack already present."
 
-5. **Add the knowledge pack.** Run:
+5. **Add the knowledge pack.** Always pass `--force` — the pack's `note`/`references` types are intentionally composable with other packs, and `--force` cleanly reconciles a colliding `references` declaration (e.g. one a `vault`/WBS pack already added) by stripping it and re-appending ours. Run:
 
    ```sh
-   tusk pack add "file://${CLAUDE_PLUGIN_ROOT}/packs/knowledge.toml"
+   tusk pack add --force "file://${CLAUDE_PLUGIN_ROOT}/packs/knowledge.toml"
    ```
 
-   Use `--force` only if step 4 detected a colliding but equivalent declaration. Hard error on other failures.
+   Hard error on failure.
 
 6. **Verify with `tusk doctor`.** Surface output verbatim. Expect `doctor: no issues`.
 

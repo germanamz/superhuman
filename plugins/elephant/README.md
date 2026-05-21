@@ -13,6 +13,12 @@ Makes Tusk the agent's short-to-medium-term memory keeper. Capture learnings bro
 ### Skills
 - _Coming in later stories_: `conventions` (graph-hygiene rulebook), `capture` (broad note capture), `recall` (windowed retrieval).
 
+## Layout
+
+- `commands/` — slash commands (one Markdown file per command)
+- `packs/` — Tusk type packs (TOML) installed by `/bootstrap`
+- `references/` — shared procedure docs the skills read (e.g. `references/availability-check.md`, the present/absent gate `capture` and `recall` run before touching the graph)
+
 ## Conventions
 
 Declares canonical, unprefixed Tusk types. Built-in packs (`tags`, `kanban`, `vault`) are seeds you extend via `tusk pack add … --force`, not competitors to avoid.
