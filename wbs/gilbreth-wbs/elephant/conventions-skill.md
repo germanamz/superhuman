@@ -1,7 +1,7 @@
 ---
 type: wbs-node
 title: conventions skill
-status: plan-ready
+status: completed
 order: 1
 level: story
 ---
