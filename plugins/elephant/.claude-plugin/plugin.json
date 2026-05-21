@@ -1,0 +1,13 @@
+{
+  "name": "elephant",
+  "description": "Makes Tusk the agent's short-to-medium-term memory keeper: capture learnings broadly into a knowledge graph and recall them narrowly (windowed) so knowledge transfers seamlessly across sessions.",
+  "version": "0.0.0",
+  "author": {
+    "name": "German Meza",
+    "email": "iam@germanamz.com"
+  },
+  "homepage": "https://github.com/germanamz/superhuman",
+  "repository": "https://github.com/germanamz/superhuman",
+  "license": "MIT",
+  "keywords": []
+}

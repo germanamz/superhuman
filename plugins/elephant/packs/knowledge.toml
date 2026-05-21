@@ -1,0 +1,46 @@
+# Elephant — knowledge type pack
+#
+# A generic, WBS-agnostic knowledge graph for capturing learnings as the
+# agent's short-to-medium-term memory. Declares canonical, UNPREFIXED types
+# per the cross-plugin convention: Tusk's built-in packs (`tags`, `kanban`,
+# `vault`) are seeds you extend, and sibling plugin packs (e.g. gilbreth's
+# WBS pack) compose alongside this one via `tusk pack add … --force`.
+#
+# Minimum Tusk version: v1.4.0 — the `references` edge uses the
+# `wikilinks = true` flag to mark itself as the wikilink-materialization
+# target (configurable as of v1.4.0; in v1.3.0 the materializer hard-coded
+# the edge name `references`).
+#
+# Composition: layer the built-in `tags` pack (`tusk pack add tags`) for
+# topics (`tag` nodes + `tagged` edge). Our `references` is an intentional
+# superset that adds `wikilinks = true` (Tusk v1.4.0) — gilbreth's current
+# WBS `references` does NOT set it, so the two declarations are NOT
+# identical. `--force` is what reconciles them: it strips any pre-existing
+# `references` section and re-appends ours (the wikilink-materialization
+# target). Only one edge may carry `wikilinks = true` per workspace.
+
+[node-types.note]
+description = "A captured knowledge note — a learning, decision, open thread, or checkpoint"
+properties = [
+    { name = "kind",     type = "enum", values = ["learning","decision","open-thread","checkpoint"] },
+    { name = "archived", type = "bool" },
+]
+
+[edge-types.references]
+description = "Implicit edge materialized from body [[wikilinks]]. `wikilinks = true` marks this edge as the materialization target (Tusk v1.4.0)."
+from        = ["*"]
+to          = ["*"]
+cardinality = "many-to-many"
+ordered     = false
+acyclic     = false
+inverse     = "referenced-by"
+wikilinks   = true
+
+[edge-types.supersedes]
+description = "This note replaces a prior note (append-only knowledge history)"
+from        = ["note"]
+to          = ["note"]
+cardinality = "many-to-one"
+ordered     = false
+acyclic     = true
+inverse     = "superseded-by"
