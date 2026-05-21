@@ -22,13 +22,14 @@ Numbered for reference, not strict execution order. Order is reviewed each time 
 
 ### In progress
 
-_None._
+| # | Sub-project | Spec | Plan |
+|---|---|---|---|
+| 4 | **Elephant** — a plugin that guides the agent to use [Tusk](https://github.com/germanamz/tusk) well as a short-to-medium-term memory keeper: capture learnings broadly into the graph and recall them narrowly (windowed) so knowledge transfers seamlessly across sessions. Tracked as WBS initiative `wbs/gilbreth-wbs/elephant`, decomposed into 5 stories (knowledge pack, conventions skill, capture skill, recall skill, gilbreth refactor). | `wbs/gilbreth-wbs/elephant/spec` (Tusk note) | per-story |
 
 ### Not started
 
 | # | Sub-project | Spec | Plan |
 |---|---|---|---|
-| 4 | **Elephant** — a plugin that guides the agent to use [Tusk](https://github.com/germanamz/tusk) well: capture knowledge as interconnected graph nodes/edges so it stays discoverable through Tusk's indexation. Covers the Tusk conventions, syncing WBS nodes to Tusk, and windowed note-taking — capturing learnings so future agents pull narrow, relevant context without flooding the window | — | — |
 | 5 | **Engineering conventions** — a skill (or guide) that codifies the user's standards for code quality and software architecture | — | — |
 | 6 | **Researcher** — a plugin that guides the agent through staged research, using Elephant's skills to keep captured knowledge current as decisions and findings accrue, and keeping the user in the loop to drive each research iteration | — | — |
 
