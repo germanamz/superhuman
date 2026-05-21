@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/germanamz/superhuman/compare/gilbreth-v0.4.0...gilbreth-v1.0.0) (2026-05-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **marketplace:** the plugin install id changes from superhuman@superhuman to gilbreth@superhuman.
+
+### Features
+
+* **marketplace:** rename superhuman plugin to gilbreth ([#39](https://github.com/germanamz/superhuman/issues/39)) ([4e30f8f](https://github.com/germanamz/superhuman/commit/4e30f8f3d4d1253961de3108f296617ab1edc0f9))
+
 ## [0.4.0](https://github.com/germanamz/superhuman/compare/superhuman-v0.3.0...superhuman-v0.4.0) (2026-05-20)
 
 
