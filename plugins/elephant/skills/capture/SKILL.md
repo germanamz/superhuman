@@ -11,11 +11,11 @@ Capture is the write side of Tusk-as-memory. It applies the [`conventions`](../c
 
 **Autonomous + announced, boundary-batched.**
 
-Capture writes notes without per-note approval — asking each time defeats the proactive-memory goal. It is transparent: emit a terse one-line acknowledgment per note captured (e.g., `📝 captured learning: <title>`), so the user has visibility and can course-correct without a blocking prompt. When multiple note-worthy items surface at once, batch them at the natural boundary rather than interrupting mid-flow per item.
+Capture writes notes without per-note approval — asking each time defeats the proactive-memory goal. It is transparent: it emits a terse one-line acknowledgment per note captured (e.g., `📝 captured learning: <title>`), so the user has visibility and can course-correct without a blocking prompt. When multiple note-worthy items surface at once, batch them at the natural boundary rather than interrupting mid-flow per item.
 
 ## Procedure
 
-1. **Gate.** Run the availability check (`references/availability-check.md`). If no graph is present, offer `/bootstrap` once then go dormant for the session — do not re-offer, do not re-probe on every note-worthy moment. If the graph is present, continue silently.
+1. **Gate.** Run the availability check ([`references/availability-check.md`](../../references/availability-check.md)). If no graph is present, offer `/bootstrap` once then go dormant for the session — do not re-offer, do not re-probe on every note-worthy moment. If the graph is present, continue silently.
 
 2. **Identify items.** Enumerate the note-worthy items from the work (or from the explicit request). Assign each a `kind` — `learning | decision | open-thread | checkpoint` — per `conventions`. Skip anything trivial or re-derivable from code or docs.
 
@@ -23,7 +23,7 @@ Capture writes notes without per-note approval — asking each time defeats the 
 
 4. **Create / append / supersede** per `conventions`: new note for a distinct idea; append when adding detail to the same idea; `archived=true` + a `supersedes` edge from the replacement note when an existing note is wrong or outdated.
 
-5. **Model the note** per `conventions`: small and atomic, discoverable title and body (name the thing — avoid pronouns-only bodies), topic `tags` via `tusk_edge_add`, and `[[wikilinks]]` to related notes to materialize `references` edges.
+5. **Model the note** per `conventions`: small and atomic, discoverable title and body, topic `tags` via `tusk_edge_add`, `[[wikilinks]]` to related notes.
 
 6. **Write** via MCP (`tusk_node_create` / `tusk_node_modify`, `tusk_edge_add`). MCP-preferred; fall back to the equivalent `tusk` CLI verbs (`tusk node create`, `tusk node modify`, `tusk edge add`) when the MCP server is unreachable.
 
