@@ -21,7 +21,7 @@ Optional free-form text. Recognized keyword params:
 
 2. **Initialize the workspace.** Run `tusk init --name <name>` from CWD, where `<name>` is the `name=` keyword if supplied, else `$(basename "$PWD")`. Hard error if `tusk init` fails. After init, ensure `.tusk/` is gitignored — if `.gitignore` doesn't already mention it, append a single line: `.tusk/`. `tusk init` does this itself in fresh repos; the check is for repos whose `.gitignore` predates it.
 
-3. **Detect existing pack.** Read `tusk.toml` and check for `[node-types.wbs-node]`. If present, the pack is already loaded — skip step 4 and emit a soft note: "gilbreth-wbs pack already present; skipping `tusk pack add`."
+3. **Detect existing pack.** Read `tusk.toml` and check for `[behaviors.workflow.wbs-workflow]`. If present, the pack is already loaded — skip step 4 and emit a soft note: "gilbreth-wbs pack already present; skipping `tusk pack add`."
 
 4. **Add the gilbreth-wbs pack.** Resolve the absolute path to this plugin's `packs/wbs.toml`. Inside a slash command, `${CLAUDE_PLUGIN_ROOT}` resolves to the plugin's install root, so the pack lives at `${CLAUDE_PLUGIN_ROOT}/packs/wbs.toml`. Run:
 

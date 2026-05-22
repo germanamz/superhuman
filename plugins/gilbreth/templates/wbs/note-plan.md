@@ -1,6 +1,6 @@
 # Plan — <node-title>
 
-**wbs-note frontmatter:** `kind=plan` (linked to its node by a `wbs-about` edge)
+**note frontmatter:** `kind=plan` (linked to its node by an `about` edge)
 
 **Spec reference:** `[[wbs/<project>/<story>-spec]]` (wikilink — materializes a `references` edge to the spec note)
 
@@ -10,7 +10,7 @@
 
 ## Tasks
 
-<Numbered task list. Each task corresponds to a wbs-node that will be created at `level=task` parented to the Story this plan belongs to. For each:
+<Numbered task list. Each task corresponds to a node that will be created at `level=task` parented to the Story this plan belongs to. For each:
 
 ### Task <N>: <title>
 

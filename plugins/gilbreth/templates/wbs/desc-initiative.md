@@ -36,4 +36,4 @@ No phases needed.
 
 ## Stories
 
-<The story titles this initiative spans. Each becomes a wbs-node at `level=story` parented to this Initiative via a `wbs-parent` edge.>
+<The story titles this initiative spans. Each becomes a node at `level=story` parented to this Initiative via a `parent` edge.>

@@ -1,6 +1,6 @@
 # Phase plan (heavy) — <parent-title> / phase <N>
 
-**wbs-note frontmatter:** `kind=phase-plan, phase=phase-<N>` (linked to its Story by a `wbs-about` edge)
+**note frontmatter:** `kind=phase-plan, phase=phase-<N>` (linked to its Story by an `about` edge)
 
 **Use this template when** the parent node is a Story whose implementation plan needs phasing — typically because the work splits across multiple implementer agents or has compilation-safety bridge code requirements. Follows the contract from the existing `phase-planning-rules` skill.
 
@@ -14,7 +14,7 @@
 
 ## Tasks (4–6)
 
-<A numbered list of exactly 4–6 tasks the implementer agent will execute. Each task is a wbs-node at `level=task`, parented to the Story via `wbs-parent`, with the `phase=phase-<N>` property.
+<A numbered list of exactly 4–6 tasks the implementer agent will execute. Each task is a node at `level=task`, parented to the Story via `parent`, with the `phase=phase-<N>` property.
 
 ### Task 1: <title>
 

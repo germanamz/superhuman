@@ -5,7 +5,7 @@ argument-hint: [free-form hint] [task=<path-id>]
 
 # /wbs-status
 
-Render the WBS subtree from the given node (or from the project root if no node is specified). Each line shows the node's level, title, status, %done rollup, and phase tag. Warnings surface inline per node: empty Karpathy fields at design levels, `wbs-blocks` relationships, `tusk doctor` workflow drift, orphan nodes, and phase-tag mismatches.
+Render the WBS subtree from the given node (or from the project root if no node is specified). Each line shows the node's level, title, status, %done rollup, and phase tag. Warnings surface inline per node: empty Karpathy fields at design levels, `blocks` relationships, `tusk doctor` workflow drift, orphan nodes, and phase-tag mismatches.
 
 Read-only: this command never mutates state. Free to re-run at any time.
 
@@ -17,7 +17,7 @@ Optional free-form text. The model interprets hints in natural language ("only s
 
 - `task=<path-id>` (optional) — Tusk node path (e.g., `wbs/cli-v2-migration/wbs-pack-polish`). Defaults to the current node context maintained by `wbs-orientation`, or the project root if no context exists.
 
-`project=<id>` is **no longer supported** — under Tusk v1 a project is a `wbs-node` like any other, addressable by path through `task=<path-id>`.
+`project=<id>` is **no longer supported** — under Tusk v1 a project is a `node` like any other, addressable by path through `task=<path-id>`.
 
 ## Tool surface
 
@@ -37,7 +37,7 @@ In order of preference:
 
 1. `task=<path-id>` keyword parameter, verbatim.
 2. The current node context maintained by the `wbs-orientation` skill (the node most recently inspected, created, or referenced this session).
-3. The project root — discovered via `tusk_query 'type:wbs-node AND level:project' --take 1`. If multiple projects exist and none is implied by context, ask the user which to render.
+3. The project root — discovered via `tusk_query 'type:node AND level:project' --take 1`. If multiple projects exist and none is implied by context, ask the user which to render.
 
 Confirm with `tusk_node_get <id>` and surface any error (missing node, wrong type) verbatim.
 
@@ -53,19 +53,19 @@ Surface the inferred filter back to the user in plain language ("Showing only `i
 
 ### 4. Fetch the subtree
 
-Tusk's `tree:wbs=<id>` qualified shortcut walks **outbound** from `<id>` via `wbs-parent` — which means ancestors of `<id>`, not descendants. Since `wbs-parent` is directed child→parent, that's the wrong direction for a subtree render. Use the inverse pattern instead.
+Tusk's `tree:parent=<id>` qualified shortcut walks **outbound** from `<id>` via `parent` — which means ancestors of `<id>`, not descendants. Since `parent` is directed child→parent, that's the wrong direction for a subtree render. Use the inverse pattern instead.
 
-**Direct children** of a node — `parent:wbs=<id>` (or `tusk_edge_list --to=<id> --type=wbs-parent`):
+**Direct children** of a node — `parent:parent=<id>` (or `tusk_edge_list --to=<id> --type=parent`):
 
 ```
-tusk_query 'parent:wbs=<root-id>' --sort '+order'
+tusk_query 'parent:parent=<root-id>' --sort '+order'
 ```
 
-Returns the immediate children of `<root-id>`. The `--sort '+order'` clause renders siblings by their `order` property (the priority signal — see `pack-redesign-brainstorm.md`).
+Returns the immediate children of `<root-id>`. The `--sort '+order'` clause renders siblings by their `order` property (the priority signal).
 
 **Full subtree** — recurse: start with the root, fetch its direct children via the above, then for each child fetch its children, etc. Bound the recursion by the depth filter inferred in step 3 (default unbounded; in practice the WBS taxonomy caps at 6 levels: project / milestone / initiative / story / task / spike). Track visited IDs to short-circuit any accidental cycles (the workflow's `acyclic = true` should prevent them but the render is defensive).
 
-When MCP is unavailable, equivalent CLI: `tusk query 'parent:wbs=<id>' --sort '+order'` per level.
+When MCP is unavailable, equivalent CLI: `tusk query 'parent:parent=<id>' --sort '+order'` per level.
 
 ### 5. Compute %done rollup
 
@@ -80,13 +80,13 @@ Per node, surface these markers in the render:
 | Warning | Detection | Marker |
 |---|---|---|
 | Empty Karpathy fields (design levels) | Body lacks non-empty `## Success Criteria`, `## Assumptions Made`, `## Open Questions`, `## Tradeoffs Considered`, or `## Out of Scope` | `⚠ karpathy:<field>` (one per missing field) |
-| Phase / phase-plan-note mismatch | Node with `phase=phase-N` whose parent has no `wbs-note` with `kind=phase-plan, phase=phase-N` (or vice versa: phase-plan note without any matching children) | `⚠ phase-mismatch` |
-| Reparented stale `phase` | Node's `wbs-parent` source differs from where the `phase` property was originally written (heuristic; surface as informational) | `⚠ phase-stale` |
-| `wbs-blocks` relationships | Outgoing `wbs-blocks` and incoming `wbs-blocked-by` edges | `BLOCKS: <ids>` / `BLOCKED-BY: <ids>` lines under the node |
+| Phase / phase-plan-note mismatch | Node with `phase=phase-N` whose parent has no `note` with `kind=phase-plan, phase=phase-N` (or vice versa: phase-plan note without any matching children) | `⚠ phase-mismatch` |
+| Reparented stale `phase` | Node's `parent` source differs from where the `phase` property was originally written (heuristic; surface as informational) | `⚠ phase-stale` |
+| `blocks` relationships | Outgoing `blocks` and incoming `blocked-by` edges | `BLOCKS: <ids>` / `BLOCKED-BY: <ids>` lines under the node |
 | Workflow drift | Node appears in `tusk_doctor`'s `workflow-violation` list | `⚠ workflow-drift: <observed-status>` |
-| Orphan wbs-node | Non-project node with no outgoing `wbs-parent` edge | `⚠ orphan` (with hint: "missing `wbs-parent: <target>` in frontmatter") |
+| Orphan node | Non-project node with no outgoing `parent` edge | `⚠ orphan` (with hint: "missing `parent: <target>` in frontmatter") |
 
-`tusk_doctor` and `tusk_edge_list --type=wbs-blocks` can each be called once at the start of the render; both produce maps the renderer joins per node.
+`tusk_doctor` and `tusk_edge_list --type=blocks` can each be called once at the start of the render; both produce maps the renderer joins per node.
 
 ### 7. Render the tree
 
@@ -107,7 +107,7 @@ After the tree, print a legend showing the warning symbols and their meanings, p
 
 - **Tusk unavailable (both MCP and CLI)** — hard error with remediation: install Tusk, ensure the binary is on `PATH` or the MCP server is configured.
 - **Node specified by `task=<path-id>` not found** — surface the underlying error verbatim and suggest `/wbs-status` with no argument to render from the project root.
-- **No project node exists in the workspace** — hard error: "No `wbs-node level=project` found. Run `/wbs-bootstrap` and `/wbs-new create a project for <…>` first."
+- **No project node exists in the workspace** — hard error: "No `node level=project` found. Run `/wbs-bootstrap` and `/wbs-new create a project for <…>` first."
 - **Hint interpretation ambiguous** — re-prompt the user with the inferred filter and ask for explicit confirmation rather than guessing.
 
 ## Examples
