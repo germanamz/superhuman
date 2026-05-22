@@ -13,7 +13,7 @@ Makes Tusk the agent's short-to-medium-term memory keeper. Capture learnings bro
 ### Skills
 - `conventions` — auto-invoking graph-hygiene rulebook for the knowledge pack.
 - `capture` — proactively writes note-worthy work (learnings, decisions, open-threads, checkpoints) into the graph; auto-invoking and invocable by name.
-- _Coming in a later story_: `recall` (windowed retrieval).
+- `recall` — pulls the relevant windowed slice of prior knowledge into context when needed; auto-invoking and invocable by name.
 
 ## Layout
 
