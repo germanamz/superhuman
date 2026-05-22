@@ -11,13 +11,15 @@ Makes Tusk the agent's short-to-medium-term memory keeper. Capture learnings bro
 - `packs/knowledge.toml` — a generic, WBS-agnostic knowledge graph: a `note` type (`kind`: learning | decision | open-thread | checkpoint) with `references` (wikilink-materialized) and `supersedes` edges. Requires Tusk v1.4.0+.
 
 ### Skills
-- _Coming in later stories_: `conventions` (graph-hygiene rulebook), `capture` (broad note capture), `recall` (windowed retrieval).
+- `conventions` — auto-invoking graph-hygiene rulebook for the knowledge pack (how to model and recall knowledge well).
+- _Coming in later stories_: `capture` (broad note capture), `recall` (windowed retrieval).
 
 ## Layout
 
 - `commands/` — slash commands (one Markdown file per command)
 - `packs/` — Tusk type packs (TOML) installed by `/bootstrap`
 - `references/` — shared procedure docs the skills read (e.g. `references/availability-check.md`, the present/absent gate `capture` and `recall` run before touching the graph)
+- `skills/` — auto-invoking skills (one directory per skill, each containing a `SKILL.md`)
 
 ## Conventions
 
