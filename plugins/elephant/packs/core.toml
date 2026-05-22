@@ -1,0 +1,74 @@
+# Elephant — core type pack
+#
+# The marketplace's single canonical Tusk graph vocabulary. Generic: no
+# WBS or domain semantics. `kind`/`level` are free strings so consumers
+# (elephant's knowledge skills, gilbreth's WBS workflow, future plugins)
+# specialize via string values without coupling enums. Tusk v1.4.0+.
+#
+# Compose with the built-in `tags` pack for topics. Other built-in packs
+# (kanban/vault) are seeds you extend via `tusk pack add --force`.
+
+[node-types.node]
+description = "A graph node — specialized by `kind`/`level` string values"
+properties = [
+    { name = "kind",     type = "string" },
+    { name = "level",    type = "string" },
+    { name = "phase",    type = "string" },
+    { name = "archived", type = "bool" },
+    { name = "order",    type = "int" },
+]
+
+[node-types.note]
+description = "A note attached to nodes / the graph — specialized by `kind` string"
+properties = [
+    { name = "kind",     type = "string" },
+    { name = "phase",    type = "string" },
+    { name = "archived", type = "bool" },
+]
+
+[edge-types.parent]
+description = "Hierarchy: this node is a child of another node"
+from = ["node"]
+to   = ["node"]
+cardinality = "many-to-one"
+ordered = true
+acyclic = true
+inverse = "children"
+hierarchy = "parent"
+
+[edge-types.about]
+description = "This note is about a node"
+from = ["note"]
+to   = ["node"]
+cardinality = "many-to-one"
+ordered = false
+acyclic = true
+inverse = "notes"
+
+[edge-types.supersedes]
+description = "This note replaces a prior note (append-only history)"
+from = ["note"]
+to   = ["note"]
+cardinality = "many-to-one"
+ordered = false
+acyclic = true
+inverse = "superseded-by"
+
+[edge-types.blocks]
+description = "This node blocks another node"
+from = ["node"]
+to   = ["node"]
+cardinality = "many-to-many"
+ordered = false
+acyclic = true
+inverse = "blocked-by"
+
+[edge-types.references]
+description = "Implicit edge materialized from body [[wikilinks]] (wikilinks = true marks the materialization target, Tusk v1.4.0)."
+from = ["*"]
+to   = ["*"]
+cardinality = "many-to-many"
+ordered = false
+acyclic = false
+inverse = "referenced-by"
+wikilinks = true
