@@ -1,9 +1,9 @@
 ---
 type: wbs-node
 title: recall skill
-level: story
-status: plan-ready
 order: 3
+level: story
+status: completed
 ---
 
 # recall skill
