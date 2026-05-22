@@ -1,9 +1,9 @@
 ---
 type: wbs-node
 title: capture skill
-level: story
-status: plan-ready
+status: completed
 order: 2
+level: story
 ---
 
 # capture skill
