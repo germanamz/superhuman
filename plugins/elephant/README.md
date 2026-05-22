@@ -5,13 +5,13 @@ Makes Tusk the agent's short-to-medium-term memory keeper. Capture learnings bro
 ## What ships
 
 ### Commands
-- `/bootstrap` — initialize a Tusk workspace and install the `knowledge` + `tags` packs.
+- `/bootstrap` — initialize a Tusk workspace and install the `core` + `tags` packs.
 
 ### Packs
-- `packs/knowledge.toml` — a generic, WBS-agnostic knowledge graph: a `note` type (`kind`: learning | decision | open-thread | checkpoint) with `references` (wikilink-materialized) and `supersedes` edges. Requires Tusk v1.4.0+.
+- `packs/core.toml` — the marketplace's single canonical Tusk vocabulary: generic `node`/`note` types (`kind`/`level` are free strings; Elephant's knowledge notes use `kind`: learning | decision | open-thread | checkpoint) with `parent`/`about`/`supersedes`/`blocks`/`references` (wikilink-materialized) edges. Requires Tusk v1.4.0+.
 
 ### Skills
-- `conventions` — auto-invoking graph-hygiene rulebook for the knowledge pack.
+- `conventions` — auto-invoking graph-hygiene rulebook for the core pack.
 - `capture` — proactively writes note-worthy work (learnings, decisions, open-threads, checkpoints) into the graph; auto-invoking and invocable by name.
 - `recall` — pulls the relevant windowed slice of prior knowledge into context when needed; auto-invoking and invocable by name.
 
