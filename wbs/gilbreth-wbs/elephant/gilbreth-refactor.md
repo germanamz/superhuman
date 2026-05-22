@@ -3,7 +3,7 @@ type: wbs-node
 title: "gilbreth refactor: defer to elephant + drop type prefixes"
 order: 4
 level: story
-status: drafted
+status: plan-ready
 ---
 
 # gilbreth refactor: defer to elephant + drop type prefixes
@@ -40,11 +40,11 @@ gilbreth is brought in line with Elephant on two fronts: (1) its generic Tusk di
 
 ## Spec note
 
-Populated by this story's wrapped brainstorming.
+[[wbs/gilbreth-wbs/elephant/gilbreth-refactor-spec]]
 
 ## Plan note
 
-Populated by this story's wrapped writing-plans.
+[[wbs/gilbreth-wbs/elephant/gilbreth-refactor-plan]]
 
 ## Phasing
 

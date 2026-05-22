@@ -5,7 +5,7 @@ description: Use whenever about to read or write a Tusk knowledge graph — crea
 
 # Conventions
 
-This is the graph-hygiene rulebook for the `knowledge` pack — generic across all project types. `capture`, `recall`, and gilbreth all build on these rules — read this first whenever you touch a Tusk knowledge graph.
+This is the graph-hygiene rulebook for the `core` pack — generic across all project types. `capture`, `recall`, and gilbreth all build on these rules — read this first whenever you touch a Tusk knowledge graph.
 
 ## Windowed memory
 
@@ -17,7 +17,7 @@ The core principle: **capture broadly, keep each note small and atomic, recall n
 
 ## Note granularity & kind
 
-Every `note` should capture exactly one idea. Choose `kind` by the nature of that idea:
+Every `note` should capture exactly one idea. At the pack level `kind` is a free string (the `core` pack does not constrain it to an enum), so consumers can introduce their own values. For Elephant's knowledge notes, use one of these **recommended** values, chosen by the nature of the idea:
 
 - `learning` — a durable, non-obvious finding: something you learned that would surprise the agent on a cold read. Not ephemeral state; something worth knowing next session.
 - `decision` — a choice that was made, plus its rationale. Records not just *what* was decided but *why*, so it isn't re-litigated.

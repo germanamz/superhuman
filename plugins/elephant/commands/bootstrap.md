@@ -1,11 +1,11 @@
 ---
-description: Initialize the current repo as a Tusk workspace and install Elephant's knowledge pack (plus the built-in tags pack) so capture/recall can write the agent's memory graph.
+description: Initialize the current repo as a Tusk workspace and install Elephant's core pack (plus the built-in tags pack) so capture/recall can write the agent's memory graph.
 argument-hint: [name=<workspace-name>]
 ---
 
 # /bootstrap
 
-Bootstrap the current working directory for Elephant's knowledge graph on Tusk v1.4.0+. Idempotent: safe to re-run. Initializes a Tusk workspace (if absent), adds the built-in `tags` pack and Elephant's `knowledge` pack, then prints what-to-do-next.
+Bootstrap the current working directory for Elephant's knowledge graph on Tusk v1.4.0+. Idempotent: safe to re-run. Initializes a Tusk workspace (if absent), adds the built-in `tags` pack and Elephant's `core` pack, then prints what-to-do-next.
 
 This is the one-time init that Elephant's `capture`/`recall` skills offer when they detect no graph. Once the pack is in place it's a no-op.
 
@@ -23,12 +23,12 @@ Optional free-form text. Recognized keyword params:
 
 3. **Add the tags pack.** Run `tusk pack add tags`. Idempotent; surface stderr verbatim on failure.
 
-4. **Detect existing knowledge pack.** Read `tusk.toml`; if `[node-types.note]` is present, skip step 5 with a soft note: "knowledge pack already present."
+4. **Detect existing core pack.** Read `tusk.toml`; if `[node-types.note]` is present, skip step 5 with a soft note: "core pack already present."
 
-5. **Add the knowledge pack.** Always pass `--force` — the pack's `note`/`references` types are intentionally composable with other packs, and `--force` cleanly reconciles a colliding `references` declaration (e.g. one a `vault`/WBS pack already added) by stripping it and re-appending ours. Run:
+5. **Add the core pack.** Always pass `--force` — the pack's `note`/`references` types are intentionally composable with other packs, and `--force` cleanly reconciles a colliding `references` declaration (e.g. one a `vault`/WBS pack already added) by stripping it and re-appending ours. Run:
 
    ```sh
-   tusk pack add --force "file://${CLAUDE_PLUGIN_ROOT}/packs/knowledge.toml"
+   tusk pack add --force "file://${CLAUDE_PLUGIN_ROOT}/packs/core.toml"
    ```
 
    Hard error on failure.
@@ -42,8 +42,8 @@ Optional free-form text. Recognized keyword params:
 ## Errors
 
 - **Tusk CLI not on PATH** — hard error; point at the Tusk v1.4.0+ install (`github.com/germanamz/tusk` releases).
-- **Tusk older than v1.4.0** — the `wikilinks = true` flag in `knowledge.toml` requires v1.4.0; surface a clear version error.
-- **`${CLAUDE_PLUGIN_ROOT}/packs/knowledge.toml` not found** — corrupted install; recommend reinstalling the `elephant` plugin.
+- **Tusk older than v1.4.0** — the `wikilinks = true` flag in `core.toml` requires v1.4.0; surface a clear version error.
+- **`${CLAUDE_PLUGIN_ROOT}/packs/core.toml` not found** — corrupted install; recommend reinstalling the `elephant` plugin.
 
 ## Examples
 

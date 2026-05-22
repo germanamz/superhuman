@@ -4,10 +4,10 @@ Both `capture` and `recall` gate on this before touching the graph.
 
 ## Procedure
 
-1. **Probe for the knowledge pack.** Query the `note` type:
+1. **Probe for the core pack.** Query the `note` type:
    - MCP: `tusk_query type=note take=1`
    - CLI: `tusk query 'type:note' --take 1`
-   An "unknown node type" / undeclared-type error means the `knowledge` pack is NOT installed. A success (even zero rows) means it is.
+   An "unknown node type" / undeclared-type error means the `core` pack is NOT installed. A success (even zero rows) means it is.
 
 2. **If present:** proceed silently. Operate on the graph.
 
