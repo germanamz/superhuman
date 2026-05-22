@@ -7,6 +7,8 @@ description: Use when working in any WBS context — running /wbs-new or /wbs-st
 
 This is the orchestrator skill for the Gilbreth WBS spine. It is **rigid** — the order of operations below is enforced. Read `templates/wbs/conventions.md` (in the same plugin) before diverging from any step.
 
+This skill relies on `elephant:conventions` for generic graph hygiene rules (windowed access, note granularity, create vs. append vs. supersede, wikilinks, archive-don't-delete, tool discipline). The `core` pack (from the `elephant` plugin) must be installed alongside the `gilbreth-wbs` workflow pack.
+
 ## When to invoke
 
 Auto-invoke when ANY of the following is true:

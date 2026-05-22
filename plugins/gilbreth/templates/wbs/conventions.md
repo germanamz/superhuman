@@ -2,6 +2,8 @@
 
 This document codifies the discipline the WBS orchestrator skill enforces. Read this before working on any WBS node.
 
+> **Generic graph hygiene** (windowed access, note granularity, create vs. append vs. supersede, wikilinks, archive-don't-delete, tool discipline) is covered by `elephant:conventions`. Read that first — the rules here are WBS-specific additions on top of it.
+
 ## Right-sized descriptions
 
 A task description must be sized to its level:
@@ -42,13 +44,14 @@ If neither applies, "No phases needed" is the right answer in the Phasing field.
 
 ## Property and edge naming
 
+WBS-specific conventions (canonical type and edge names come from Elephant's `core` pack; see `elephant:conventions` for generic graph rules):
+
 - Phase identification: the `phase=phase-1`, `phase=phase-2`, … property on nodes (and on `kind=phase-plan` notes).
 - Note kinds: `kind=brainstorm | spec | plan | phase-plan | reshape-audit` on notes.
 - Note attachment: an `about` edge from the note to its node.
 - Reshape lineage: a `supersedes` edge from the new spec note to the prior one; the reshape-audit note records the bridge in prose with `[[wikilinks]]`.
 - Archive marker on nodes: the workflow terminal `status=archived` (no separate tag — the status is the signal).
-- Cross-references in bodies: `[[wikilinks]]` materialize `references` edges (the pack declares `[edge-types.references]`).
-- WBS-specific edges are prefixed `wbs-` to avoid collisions; `references` is the one un-prefixed edge (the wikilink materializer hard-codes the name).
+- Cross-references in bodies: `[[wikilinks]]` materialize `references` edges (declared in the `core` pack).
 
 ## Decomposition gate
 
