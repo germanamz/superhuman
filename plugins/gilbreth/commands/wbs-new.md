@@ -27,9 +27,9 @@ A single free-form text argument describing what to create. The command extracts
 
 1. **Parse input.** Extract `task=<parent-path>`. Treat the remainder as free-form context.
 
-2. **Resolve the active project.** A project is a `wbs-node level=project` — query `tusk_query 'type:wbs-node AND level:project'`. If `task=<parent-path>` was passed, derive the project from that node's ancestry. If exactly one project exists, use it. If more than one exists and none is implied, ask the user which to work in. If no project exists, hard error pointing at `/wbs-bootstrap`.
+2. **Resolve the active project.** A project is a `node level=project` — query `tusk_query 'type:node AND level:project'`. If `task=<parent-path>` was passed, derive the project from that node's ancestry. If exactly one project exists, use it. If more than one exists and none is implied, ask the user which to work in. If no project exists, hard error pointing at `/wbs-bootstrap`.
 
-3. **Confirm the pack is present.** `tusk_node_list type=wbs-node` must succeed (the level enum and `wbs-parent` edge come from the `gilbreth-wbs` pack). If it errors with an unknown-type response, hard error pointing at `/wbs-bootstrap`.
+3. **Confirm the pack is present.** `tusk_node_list type=node` must succeed (the `parent` edge and `wbs-workflow` behavior come from the installed packs). If it errors with an unknown-type response, hard error pointing at `/wbs-bootstrap`.
 
 4. **Infer the level** from the free-form context. If no clear cue, ask the user. Confirm the level is one of the pack's declared values (`project / milestone / initiative / story / task / spike`).
 
@@ -37,7 +37,7 @@ A single free-form text argument describing what to create. The command extracts
    - `task=<parent-path>` keyword param.
    - The "current" node — the one most recently inspected, modified, or created in this session (the orchestrator skill maintains this context).
    - For `level=project`, no parent — the node is created as a root.
-   - Otherwise, ask the user which parent to use, listing recent candidates via `tusk_query 'type:wbs-node' --sort '-modified' --take 10`.
+   - Otherwise, ask the user which parent to use, listing recent candidates via `tusk_query 'type:node' --sort '-modified' --take 10`.
 
 6. **Validate parent rank.** The parent's level must rank above the new node's level. Surface any mismatch early. (Skipping ranks is allowed but warned — see Errors.)
 
@@ -46,8 +46,8 @@ A single free-form text argument describing what to create. The command extracts
 8. **Load the description template.** Read `plugins/gilbreth/templates/wbs/desc-<level>.md` from the plugin. Replace `<*-title>` placeholders with the resolved title. Hand the residual free-form context to the orchestrator as the brainstorming seed.
 
 9. **Create the node (composite).** Two steps, in order:
-   - `tusk_node_create --type wbs-node --path wbs/<project>/<slug>.md --prop level=<inferred-level>` with the populated template content as the body, and `--title <resolved-title>`.
-   - Unless the new node is a `level=project` root: `tusk_edge_add --type wbs-parent --source <new-node-path> --target <parent-path>`. Under Tusk v1.3.0 this writes `wbs-parent: <parent-path>` into the new node's frontmatter and reindexes it.
+   - `tusk_node_create --type node --path wbs/<project>/<slug>.md --prop level=<inferred-level>` with the populated template content as the body, and `--title <resolved-title>`.
+   - Unless the new node is a `level=project` root: `tusk_edge_add --type parent --source <new-node-path> --target <parent-path>`. Under Tusk v1.3.0 this writes `parent: <parent-path>` into the new node's frontmatter and reindexes it.
 
 10. **Hand off to the orchestrator skill.** Invoke `wbs-orientation` so it can begin walking the user through brainstorming the new node's content (seeded with the residual free-form context) and driving the Karpathy decomposition gate.
 
@@ -58,7 +58,7 @@ A single free-form text argument describing what to create. The command extracts
 - **No project node exists** — hard error: run `/wbs-bootstrap` then `/wbs-new create a project for <…>`.
 - **Level cannot be inferred and the user can't disambiguate** — hard error.
 - **Invalid level / rank-parent mismatch** — surface Tusk's validation error verbatim.
-- **Skipping ranks (e.g., a story directly under a project)** — allow but flag with a warning. Tusk permits any-ancestor-to-any-descendant parenting via the `wbs-parent` edge.
+- **Skipping ranks (e.g., a story directly under a project)** — allow but flag with a warning. Tusk permits any-ancestor-to-any-descendant parenting via the `parent` edge.
 
 ## Examples
 

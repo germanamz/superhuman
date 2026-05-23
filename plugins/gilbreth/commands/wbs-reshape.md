@@ -21,7 +21,7 @@ Free-form text describing why the reshape is being triggered — the contradicti
 
 1. **Parse input.** Extract `task=<focal-path>`. Treat the remainder as free-form trigger context.
 
-2. **Resolve the active project.** A project is a `wbs-node level=project` (`tusk_query 'type:wbs-node AND level:project'`). If `task=<focal-path>` was passed, derive the project from that node's ancestry. If exactly one project exists, use it; if more than one and none is implied, ask the user which.
+2. **Resolve the active project.** A project is a `node level=project` (`tusk_query 'type:node AND level:project'`). If `task=<focal-path>` was passed, derive the project from that node's ancestry. If exactly one project exists, use it; if more than one and none is implied, ask the user which.
 
 3. **Resolve the focal node.** If `task=<focal-path>` was passed, use it directly. Otherwise pass through to the skill — its step 2 handles fall-back resolution (most-recently-inspected node, then user prompt).
 

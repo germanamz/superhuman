@@ -1,6 +1,6 @@
 # Phase plan (light) — <parent-title> / phase <N>
 
-**wbs-note frontmatter:** `kind=phase-plan, phase=phase-<N>` (linked to its parent node by a `wbs-about` edge)
+**note frontmatter:** `kind=phase-plan, phase=phase-<N>` (linked to its parent node by an `about` edge)
 
 **Use this template when** the parent node is at Project, Milestone, or Initiative level and you need to break design or research work into chunks.
 

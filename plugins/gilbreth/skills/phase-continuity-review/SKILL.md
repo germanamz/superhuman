@@ -9,7 +9,7 @@ Run this review after all phase-plan notes for a Story are drafted, before dispa
 
 Tusk surface: MCP-preferred (`tusk_edge_list`, `tusk_query`, `tusk_node_get`) with `tusk` CLI fallback. Node IDs are workspace-relative paths.
 
-Enumerate the Story's phase-plan notes via `tusk_edge_list --to=<story-path> --type=wbs-about`, keep those with `kind=phase-plan, archived=false`, and sort by the `phase` property. Walk every adjacent phase pair end-to-end and verify each check below. If any check fails, revise the relevant phase-plan notes before dispatching tasks. Implementer subagents cannot recover from plan-level errors — they execute their task body literally, with no ability to course-correct across phase boundaries.
+Enumerate the Story's phase-plan notes via `tusk_edge_list --to=<story-path> --type=about`, keep those with `kind=phase-plan, archived=false`, and sort by the `phase` property. Walk every adjacent phase pair end-to-end and verify each check below. If any check fails, revise the relevant phase-plan notes before dispatching tasks. Implementer subagents cannot recover from plan-level errors — they execute their task body literally, with no ability to course-correct across phase boundaries.
 
 These checks verify compliance with `phase-planning-rules`. They introduce no new requirements — if a check references something, the planning rules already mandate it. Checks 1–7 are **structural** (the hard gates); check 8 is the **semantic drift** signal (additive, embeddings-gated).
 
@@ -34,7 +34,7 @@ These checks verify compliance with `phase-planning-rules`. They introduce no ne
    _Verifies: rule 9 (preserve user-visible behavior)._
 
 6. **Task count bounds.**
-   Confirm every phase-plan note has 4–6 tasks listed. Cross-check against the WBS tree: `tusk_query 'type:wbs-node AND phase:phase-N'` intersected with `tusk_edge_list --to=<story-path> --type=wbs-parent` should return the same count. Mismatches mean the note and reality disagree — fix before dispatch (either add the missing task nodes, remove extras, or update the note). Flag any phase outside 4–6 and verify it either needs splitting (>6) or has a documented reason to be narrow (<4).
+   Confirm every phase-plan note has 4–6 tasks listed. Cross-check against the WBS tree: `tusk_query 'type:node AND phase:phase-N'` intersected with `tusk_edge_list --to=<story-path> --type=parent` should return the same count. Mismatches mean the note and reality disagree — fix before dispatch (either add the missing task nodes, remove extras, or update the note). Flag any phase outside 4–6 and verify it either needs splitting (>6) or has a documented reason to be narrow (<4).
    _Verifies: rule 5 (cap each phase at 4–6 tasks)._
 
 7. **Self-containment check.**
@@ -45,7 +45,7 @@ These checks verify compliance with `phase-planning-rules`. They introduce no ne
    For each adjacent phase pair (N → N+1), rank phase N+1's plan by similarity to phase N's boundary text:
 
    ```
-   tusk_query 'type:wbs-note AND kind:phase-plan AND phase:phase-{N+1} AND archived:false'
+   tusk_query 'type:note AND kind:phase-plan AND phase:phase-{N+1} AND archived:false'
      --semantic '<phase-N "Changes Introduced" + bridge-code section text>'
    ```
 

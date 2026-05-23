@@ -1,6 +1,6 @@
 # Brainstorm — <node-title>
 
-**wbs-note frontmatter:** `kind=brainstorm` (linked to its node by a `wbs-about` edge)
+**note frontmatter:** `kind=brainstorm` (linked to its node by an `about` edge)
 
 ## Context
 

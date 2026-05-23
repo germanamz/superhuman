@@ -32,4 +32,4 @@ No phases needed.
 
 ## Initiatives
 
-<The initiative titles this milestone groups. Each becomes a wbs-node at `level=initiative` parented to this Milestone via a `wbs-parent` edge.>
+<The initiative titles this milestone groups. Each becomes a node at `level=initiative` parented to this Milestone via a `parent` edge.>

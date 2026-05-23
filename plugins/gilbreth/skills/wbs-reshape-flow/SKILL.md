@@ -27,7 +27,7 @@ Do **not** invoke for routine description edits, typo fixes, or phrasing changes
 
 ### 1. Detect Tusk context
 
-- A project is a `wbs-node level=project`. If invoked with an explicit `task=<focal-path>` (or `project=<path>`) argument, derive the project from that node's ancestry. Otherwise query `tusk_query 'type:wbs-node AND level:project'`: use the sole project if there's one, else ask the user which (do not auto-pick).
+- A project is a `node level=project`. If invoked with an explicit `task=<focal-path>` (or `project=<path>`) argument, derive the project from that node's ancestry. Otherwise query `tusk_query 'type:node AND level:project'`: use the sole project if there's one, else ask the user which (do not auto-pick).
 - Hard error if Tusk is unreachable via both MCP and CLI. Point at `/wbs-bootstrap` for setup.
 - Hard error if the `gilbreth-wbs` pack isn't installed (the step-1 pack-presence check from `wbs-orientation`). Point at `/wbs-bootstrap`.
 - The `wbs-workflow` declares a terminal `archived` status — reshape archive semantics use it. (The `gilbreth-wbs` pack always declares it, so this is a no-op check in practice; surface a hard error only if a workspace has somehow removed it from `tusk.toml`.)
@@ -39,20 +39,20 @@ In priority order:
 1. Explicit `task=<focal-path>` from `/wbs-reshape`.
 2. Auto-invoke focal node passed by `wbs-orientation` (when delegated from an end-of-brainstorm, planning-time, or decomposition-gate trigger).
 3. The most recently inspected, modified, or created node this session.
-4. Ask the user, listing recent candidates via `tusk_query 'type:wbs-node' --sort '-modified' --take 10`.
+4. Ask the user, listing recent candidates via `tusk_query 'type:node' --sort '-modified' --take 10`.
 
-Call `tusk_node_get <focal-path>` to fetch the full node: level, status, the markdown body (the description), and its `wbs-parent` edge. There is no version field.
+Call `tusk_node_get <focal-path>` to fetch the full node: level, status, the markdown body (the description), and its `parent` edge. There is no version field.
 
 ### 3. Load original reasoning
 
-Pull all of the following. Notes attached to a node are found via `tusk_edge_list --to=<focal-path> --type=wbs-about`, then filtered by `kind` and `archived=false` (read each candidate's frontmatter, or intersect with `tusk_query 'type:wbs-note AND kind:<k> AND archived:false' --sort '-modified'`):
+Pull all of the following. Notes attached to a node are found via `tusk_edge_list --to=<focal-path> --type=about`, then filtered by `kind` and `archived=false` (read each candidate's frontmatter, or intersect with `tusk_query 'type:note AND kind:<k> AND archived:false' --sort '-modified'`):
 
 - The focal node's object (already fetched in step 2).
 - The newest non-archived `kind=spec` note on the focal node.
 - The newest non-archived `kind=plan` note, if any.
 - The newest non-archived `kind=reshape-audit` note (a prior reshape on this node, if any) — surfaces lineage when this is the second or later reshape.
-- Direct children: `tusk_edge_list --to=<focal-path> --type=wbs-parent` gives each child's source path. For each, `tusk_node_get` captures title, level, status, and the first 1–2 sentences of the body (one-line summary).
-- Any descendants currently in an in-flight status (`in-progress`). Walk the subtree via repeated `tusk_edge_list --to=<id> --type=wbs-parent` calls, collecting these into a concurrency-watch list used in step 7.
+- Direct children: `tusk_edge_list --to=<focal-path> --type=parent` gives each child's source path. For each, `tusk_node_get` captures title, level, status, and the first 1–2 sentences of the body (one-line summary).
+- Any descendants currently in an in-flight status (`in-progress`). Walk the subtree via repeated `tusk_edge_list --to=<id> --type=parent` calls, collecting these into a concurrency-watch list used in step 7.
 
 If the focal node has no spec note, surface a warning: "This node has no `kind=spec` note — there's no original reasoning to load. Reshape will proceed but the audit note's `## Original Shape` section will be sparse." Allow the user to continue or abort.
 
@@ -68,7 +68,7 @@ Before asking the user any reshape questions, produce a written summary the user
 >
 > **Tradeoffs at design time:** <bullet list pulled from the spec's `## Tradeoffs Considered`>
 
-This synthesis lands as a regular assistant message — not a wbs-note — and is the shared reference frame for the rest of the flow.
+This synthesis lands as a regular assistant message — not a note — and is the shared reference frame for the rest of the flow.
 
 ### 5. Capture the trigger
 
@@ -87,7 +87,7 @@ Invoke the `brainstorming` skill via the Skill tool with a context shim describi
 - The synthesis from step 4.
 - The trigger and invalidated assumptions from step 5.
 - The level-appropriate description template (loaded from `templates/wbs/desc-<level>.md` based on the focal node's level — same loading rules as `wbs-orientation` step 3).
-- The directive that brainstorming's terminal "Write design doc" output must land as a *new* `kind=spec` wbs-note on the focal node, **not** as `docs/superpowers/specs/<file>.md`.
+- The directive that brainstorming's terminal "Write design doc" output must land as a *new* `kind=spec` note on the focal node, **not** as `docs/superpowers/specs/<file>.md`.
 
 Use the same wrapping mechanism documented in `wbs-orientation/SKILL.md` step 5 ("Subagent capture" preferred — invoke brainstorming as a subagent with instructions to return the final spec content as text rather than write it to disk; this orchestrator then creates the note via the composite `tusk_node_create` + `tusk_edge_add` sequence in step 8.2).
 
@@ -100,7 +100,7 @@ If brainstorming's spec content does not converge (user gives up, asks too many 
 For each direct child of the focal node (loaded in step 3), present the user with the new spec content from step 6 and ask one of:
 
 - **Keep unchanged.** Leave the child alone. The new spec's children list still names this child.
-- **Reparent.** The child belongs under a different parent in the new shape. Ask which parent — an existing wbs-node or a new one. If new, run `/wbs-new <free-form context including level cue and title> task=<grandparent-path>` first to create it. Apply the move by swapping the `wbs-parent` edge: `tusk_edge_remove --type wbs-parent --source <child-path> --target <old-parent-path>` then `tusk_edge_add --type wbs-parent --source <child-path> --target <new-parent-path>`. The child's subtree comes along automatically — the child's own children still declare `wbs-parent: <child-path>`, so they ride along unchanged. Then ask: *"Reshape this child now under its new parent?"*
+- **Reparent.** The child belongs under a different parent in the new shape. Ask which parent — an existing node or a new one. If new, run `/wbs-new <free-form context including level cue and title> task=<grandparent-path>` first to create it. Apply the move by swapping the `parent` edge: `tusk_edge_remove --type parent --source <child-path> --target <old-parent-path>` then `tusk_edge_add --type parent --source <child-path> --target <new-parent-path>`. The child's subtree comes along automatically — the child's own children still declare `parent: <child-path>`, so they ride along unchanged. Then ask: *"Reshape this child now under its new parent?"*
   - If **yes**: recurse into step 1 of this skill with the reparented child as the new focal node. The recursive run posts its own `kind=reshape-audit` note; the parent reshape's audit note (this run's) lists the nested reshape note path in its `## Nested Reshapes` section. If recursion depth from the top-level invocation exceeds 3, pause and confirm with the user that continued descent is intended — deeply-nested reshapes usually mean the wrong focal node was chosen at the top.
   - If **no**: capture the deferral. Step 8.6 patches the child's `## Open Questions` section once the audit note's path is known. Do not edit the child's description in step 7. The patch format applied at step 8.6 is: `Reshape under new parent <new-parent-path> context — deferred from reshape <audit-note-path> on <YYYY-MM-DD>.`
 - **Archive.** The child no longer fits the new shape. Apply archive semantics (see "Archive semantics" below). Children of the archived child are archived recursively unless they have already been explicitly reparented out earlier in this loop.
@@ -116,15 +116,15 @@ The user can also elect to **create new children** that didn't exist before. For
 Apply in this exact order. Each step is a single Tusk call (or a small bounded loop of them). If any step fails (MCP error, missing node), surface the partial state with the paths of what was applied so the user can recover manually — do not roll back automatically. There is no version field and no optimistic lock; concurrent edits to the same files are the only conflict source, and the file watcher reconciles them.
 
 1. **Archive prior notes on the focal node.** For each non-archived `kind=spec | plan | brainstorm` note on the focal node, set `tusk_node_modify <note-path> --prop archived=true`.
-2. **Create the new `kind=spec` note** on the focal node, using the brainstorming output from step 6. Composite: `tusk_node_create --type wbs-note --prop kind=spec` with the new spec as body, then `tusk_edge_add --type wbs-about --source <new-note-path> --target <focal-path>`. Also link the supersession chain: `tusk_edge_add --type wbs-supersedes --source <new-note-path> --target <prior-spec-path>` (from step 3's loaded prior spec). Capture the new note path for the audit note's references.
+2. **Create the new `kind=spec` note** on the focal node, using the brainstorming output from step 6. Composite: `tusk_node_create --type note --prop kind=spec` with the new spec as body, then `tusk_edge_add --type about --source <new-note-path> --target <focal-path>`. Also link the supersession chain: `tusk_edge_add --type supersedes --source <new-note-path> --target <prior-spec-path>` (from step 3's loaded prior spec). Capture the new note path for the audit note's references.
 3. **Update the focal node's description** by editing the markdown body of `<focal-path>.md` directly (Read + Edit). The new description has Karpathy fields populated from the new spec (paraphrased — the spec is the authoritative version, the description is the lean-ticket reference per `templates/wbs/conventions.md`). The `## <Children>` section is rebuilt from step 7's dispositions. No version field.
 4. **Apply each child disposition.** For each direct child, in the order surfaced in step 7:
    - **Keep unchanged**: no-op.
-   - **Reparent (with recursion)**: swap the `wbs-parent` edge — `tusk_edge_remove --type wbs-parent --source <child-path> --target <old-parent-path>` then `tusk_edge_add --type wbs-parent --source <child-path> --target <new-parent-path>`. The recursive `wbs-reshape-flow` invocation runs immediately after, before processing the next child. Its mutations land in this run's step 8 ordering and its own audit note posts as part of the recursive run; the parent-reshape note (this run's) is created in substep 5 and lists the recursive run's audit-note path in its `## Nested Reshapes` section.
+   - **Reparent (with recursion)**: swap the `parent` edge — `tusk_edge_remove --type parent --source <child-path> --target <old-parent-path>` then `tusk_edge_add --type parent --source <child-path> --target <new-parent-path>`. The recursive `wbs-reshape-flow` invocation runs immediately after, before processing the next child. Its mutations land in this run's step 8 ordering and its own audit note posts as part of the recursive run; the parent-reshape note (this run's) is created in substep 5 and lists the recursive run's audit-note path in its `## Nested Reshapes` section.
    - **Reparent (without recursion)**: same edge-swap. Do not modify the child's description here — the deferred-reshape entry on `## Open Questions` is patched in substep 6, once the audit note's path is known.
    - **Archive**: see "Archive semantics" below for the procedure.
-5. **Create the `kind=reshape-audit` note** on the focal node, using `templates/wbs/note-reshape.md` as the body shape. Composite: `tusk_node_create --type wbs-note --prop kind=reshape-audit` with the populated template as body, then `tusk_edge_add --type wbs-about --source <audit-note-path> --target <focal-path>`. The body records:
-   - The prior spec path (from step 3) under a `## Supersedes` reference — the `wbs-supersedes` edge from substep 2 already captures this structurally.
+5. **Create the `kind=reshape-audit` note** on the focal node, using `templates/wbs/note-reshape.md` as the body shape. Composite: `tusk_node_create --type note --prop kind=reshape-audit` with the populated template as body, then `tusk_edge_add --type about --source <audit-note-path> --target <focal-path>`. The body records:
+   - The prior spec path (from step 3) under a `## Supersedes` reference — the `supersedes` edge from substep 2 already captures this structurally.
    - The parent reshape's audit-note path if this is a recursive run (passed in via the recursion call), under `## Parent Reshape`.
    - Every section filled. Reasoning and Invalidated Assumptions must be the verbatim user input from step 5; do not paraphrase.
 
@@ -172,13 +172,13 @@ When a node is archived as part of this reshape, apply all of the following — 
    <original description preserved below>
    ```
 
-3. **Note archival.** For every non-archived note on the node (`tusk_edge_list --to=<node-path> --type=wbs-about`), set `tusk_node_modify <note-path> --prop archived=true`.
+3. **Note archival.** For every non-archived note on the node (`tusk_edge_list --to=<node-path> --type=about`), set `tusk_node_modify <note-path> --prop archived=true`.
 
-**Cascade.** Children of the archived node that weren't explicitly reparented out in step 7 are archived recursively. Walk via `tusk_edge_list --to=<archived-path> --type=wbs-parent`, applying the steps above to each. The cascade stops at any descendant that has been explicitly reparented out earlier in step 7 — that subtree has a new parent (a different `wbs-parent` edge) and stays alive.
+**Cascade.** Children of the archived node that weren't explicitly reparented out in step 7 are archived recursively. Walk via `tusk_edge_list --to=<archived-path> --type=parent`, applying the steps above to each. The cascade stops at any descendant that has been explicitly reparented out earlier in step 7 — that subtree has a new parent (a different `parent` edge) and stays alive.
 
 **Concurrency guard.** Before archiving any node in an in-flight status (`in-progress`), the hard-confirm prompt from step 7 applies. Default N. No soft skip.
 
-**Reversal.** Archive is reversible by deliberate user action: re-point the archived node's `wbs-parent` edge back into the live tree and transition its status out of `archived`. This skill does not automate reversal — that's a separate user gesture. (Because all of this lives in git-tracked markdown, the pre-archive state is also recoverable from history.)
+**Reversal.** Archive is reversible by deliberate user action: re-point the archived node's `parent` edge back into the live tree and transition its status out of `archived`. This skill does not automate reversal — that's a separate user gesture. (Because all of this lives in git-tracked markdown, the pre-archive state is also recoverable from history.)
 
 ## Error handling
 

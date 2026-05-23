@@ -2,6 +2,8 @@
 
 This document codifies the discipline the WBS orchestrator skill enforces. Read this before working on any WBS node.
 
+> **Generic graph hygiene** (windowed access, note granularity, create vs. append vs. supersede, wikilinks, archive-don't-delete, tool discipline) is covered by `elephant:conventions`. Read that first — the rules here are WBS-specific additions on top of it.
+
 ## Right-sized descriptions
 
 A task description must be sized to its level:
@@ -36,19 +38,20 @@ Phase a node when its design or implementation work:
 
 If neither applies, "No phases needed" is the right answer in the Phasing field.
 
-**Light phasing** at upper levels (Project / Milestone / Initiative) — chunks of design or research work. Tracked as `kind=phase-plan` wbs-notes on the parent node + child nodes carrying the `phase=phase-N` property. Note shape: see `note-phase-plan-light.md`.
+**Light phasing** at upper levels (Project / Milestone / Initiative) — chunks of design or research work. Tracked as `kind=phase-plan` notes on the parent node + child nodes carrying the `phase=phase-N` property. Note shape: see `note-phase-plan-light.md`.
 
 **Heavy phasing** at Story implementation — full `phase-planning-rules` contract. Note shape: see `note-phase-plan-heavy.md`. Includes Inherits From, Changes Introduced, 4–6 child tasks per phase, compilation safety, bridge code with removal targets.
 
 ## Property and edge naming
 
-- Phase identification: the `phase=phase-1`, `phase=phase-2`, … property on wbs-nodes (and on `kind=phase-plan` notes).
-- Note kinds: `kind=brainstorm | spec | plan | phase-plan | reshape-audit` on wbs-notes.
-- Note attachment: a `wbs-about` edge from the note to its node.
-- Reshape lineage: a `wbs-supersedes` edge from the new spec note to the prior one; the reshape-audit note records the bridge in prose with `[[wikilinks]]`.
+WBS-specific conventions (canonical type and edge names come from Elephant's `core` pack; see `elephant:conventions` for generic graph rules):
+
+- Phase identification: the `phase=phase-1`, `phase=phase-2`, … property on nodes (and on `kind=phase-plan` notes).
+- Note kinds: `kind=brainstorm | spec | plan | phase-plan | reshape-audit` on notes.
+- Note attachment: an `about` edge from the note to its node.
+- Reshape lineage: a `supersedes` edge from the new spec note to the prior one; the reshape-audit note records the bridge in prose with `[[wikilinks]]`.
 - Archive marker on nodes: the workflow terminal `status=archived` (no separate tag — the status is the signal).
-- Cross-references in bodies: `[[wikilinks]]` materialize `references` edges (the pack declares `[edge-types.references]`).
-- WBS-specific edges are prefixed `wbs-` to avoid collisions; `references` is the one un-prefixed edge (the wikilink materializer hard-codes the name).
+- Cross-references in bodies: `[[wikilinks]]` materialize `references` edges (declared in the `core` pack).
 
 ## Decomposition gate
 
@@ -68,7 +71,7 @@ A reshape always:
 
 1. Records the **reasoning that triggered it** in a `kind=reshape-audit` note on the focal node — the user's voice, not a mechanical diff. Load-bearing: a future reader sees the prior spec, the new spec, and the reshape note bridges them with the learning.
 2. Archives the prior `kind=spec` and `kind=plan` notes on the focal node (sets `archived=true`).
-3. Creates a new `kind=spec` note via wrapped brainstorming, linked to the prior one with a `wbs-supersedes` edge.
+3. Creates a new `kind=spec` note via wrapped brainstorming, linked to the prior one with a `supersedes` edge.
 4. Updates each direct child to one of three states: kept unchanged, reparented (subtree comes along), or archived.
 5. Re-runs the Karpathy decomposition gate on the focal node's new description.
 
@@ -85,7 +88,7 @@ When a node is archived by reshape:
 - Descendants that weren't explicitly reparented out are archived recursively.
 - Nodes in an in-flight status (`in-progress`) require user confirmation before archive — no soft skip.
 
-Archive is reversible by deliberate user action (re-point the `wbs-parent` edge back into the live tree, transition out of `archived`). Hard delete is never required — and because everything is git-tracked markdown, the pre-archive state is recoverable from history regardless.
+Archive is reversible by deliberate user action (re-point the `parent` edge back into the live tree, transition out of `archived`). Hard delete is never required — and because everything is git-tracked markdown, the pre-archive state is recoverable from history regardless.
 
 ## Marking a node completed
 
@@ -124,8 +127,8 @@ If you run `/brainstorm` directly (not via the WBS orchestrator), the brainstorm
 
 This means:
 
-- The spec content will be a loose file in the repo, not a wbs-note in the graph.
+- The spec content will be a loose file in the repo, not a note in the graph.
 - Future agents querying Tusk for context won't find this spec.
-- If you want it in the graph later, create a `kind=spec` wbs-note (`tusk_node_create` + a `wbs-about` edge) with the content, and delete the loose file.
+- If you want it in the graph later, create a `kind=spec` note (`tusk_node_create` + an `about` edge) with the content, and delete the loose file.
 
 If you edit a node's body directly to change its scope (instead of running `/wbs-reshape`), the prior reasoning is lost — there's no audit note bridging the old and new shape. The orchestrator does not detect this after the fact. Convention: scope changes that invalidate prior assumptions go through `/wbs-reshape`; trivial typo-fixes and phrasing edits do not.

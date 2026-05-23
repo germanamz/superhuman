@@ -1,6 +1,6 @@
 # Spec — <node-title>
 
-**wbs-note frontmatter:** `kind=spec` (linked to its node by a `wbs-about` edge)
+**note frontmatter:** `kind=spec` (linked to its node by an `about` edge)
 
 ## Goal
 

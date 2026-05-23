@@ -1,6 +1,6 @@
 ---
 name: phase-planning-rules
-description: Rules for drafting phased implementation plans for a WBS-Tusk-backed Story. Use when splitting a Story's implementation into phases — each phase becomes a `kind=phase-plan` wbs-note on the Story, and each task within is dispatched per-task to a separate implementer subagent.
+description: Rules for drafting phased implementation plans for a WBS-Tusk-backed Story. Use when splitting a Story's implementation into phases — each phase becomes a `kind=phase-plan` note on the Story, and each task within is dispatched per-task to a separate implementer subagent.
 ---
 
 ## Phase Planning Rules
@@ -9,7 +9,7 @@ Tusk surface: MCP-preferred (`tusk_node_get`, `tusk_node_modify`, `tusk_edge_lis
 
 ### Execution Model
 
-Each phase is a coordination group of 4–6 wbs-nodes at `level=task`, all parented to the Story via `wbs-parent` and carrying the `phase=phase-N` property. The phase's directive lives as a wbs-note on the Story with `kind=phase-plan, phase=phase-N` (linked by a `wbs-about` edge), following `templates/wbs/note-phase-plan-heavy.md`.
+Each phase is a coordination group of 4–6 nodes at `level=task`, all parented to the Story via `parent` and carrying the `phase=phase-N` property. The phase's directive lives as a note on the Story with `kind=phase-plan, phase=phase-N` (linked by an `about` edge), following `templates/wbs/note-phase-plan-heavy.md`.
 
 **Implementer subagents are dispatched per task, not per phase.** Each subagent receives only the task's path ID. It pulls the task body (the primary directive) via `tusk_node_get`, then pulls referenced notes (`spec`, `plan`, own phase's `phase-plan`) on demand. It cannot communicate with the planning agent or other implementer subagents during execution.
 
@@ -22,7 +22,7 @@ After post-implementation verification, the planning agent posts a completion-se
 Apply these constraints when drafting each individual phase-plan note.
 
 1. **One phase-plan note per phase.**
-   Each phase gets its own `kind=phase-plan, phase=phase-N` wbs-note on the Story. Never combine multiple phases into a single note. Each note is the per-phase reference for the implementer subagents executing that phase's tasks.
+   Each phase gets its own `kind=phase-plan, phase=phase-N` note on the Story. Never combine multiple phases into a single note. Each note is the per-phase reference for the implementer subagents executing that phase's tasks.
 
 2. **The task body is the implementer's primary directive.**
    The implementer subagent receives only the task's path ID. The task body (per `templates/wbs/desc-task.md`) carries execution-ready content: target files with line ranges if applicable, the change to make, the verification command, expected output, and `[[wikilinks]]` to the parent's `kind=spec`, `kind=plan`, and own phase's `kind=phase-plan` notes. The implementer pulls referenced notes on demand. No "see phase 2 for details" — every task body must be self-contained for the per-task dispatch.
@@ -34,7 +34,7 @@ Apply these constraints when drafting each individual phase-plan note.
    The code must compile and pass type-checking after each phase ships in isolation. If a later phase depends on interfaces not yet implemented, introduce bridge code (stubs, feature flags, adapter layers, no-op implementations) within the current phase to maintain compilation. Bridge code must appear as explicit tasks in the phase-plan note (and as corresponding task nodes with `phase=phase-N`) — the implementer subagent will not infer the need.
 
 5. **Cap each phase at 4–6 tasks.**
-   If a phase exceeds 6 tasks, split it. If it has fewer than 4, consider merging with an adjacent phase — unless intentionally narrow (cleanup or migration phase). The cap is a planning sanity bound: phases that don't decompose into 4–6 tasks signal an unclear shape that should be re-examined. Each task is a child wbs-node at `level=task`, parented to the Story via `wbs-parent`, with `phase=phase-N`.
+   If a phase exceeds 6 tasks, split it. If it has fewer than 4, consider merging with an adjacent phase — unless intentionally narrow (cleanup or migration phase). The cap is a planning sanity bound: phases that don't decompose into 4–6 tasks signal an unclear shape that should be re-examined. Each task is a child node at `level=task`, parented to the Story via `parent`, with `phase=phase-N`.
 
 6. **Declare prerequisites explicitly.**
    Each phase-plan note lists which prior phases must complete first. Never rely on phase numbering alone. State "no prerequisites beyond the base codebase" or "parallel with phase-K" explicitly. The planning agent uses this to sequence task dispatch correctly.

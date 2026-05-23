@@ -1,14 +1,14 @@
 # Reshape — <focal-node-title> — <YYYY-MM-DD>
 
 <!--
-Audit-note template for `kind=reshape-audit` wbs-notes created on the focal node by the wbs-reshape-flow skill.
+Audit-note template for `kind=reshape-audit` notes created on the focal node by the wbs-reshape-flow skill.
 
 Frontmatter to set when creating this note:
   kind=reshape-audit
 
 Edges (created via tusk_edge_add, materialized into frontmatter):
-  wbs-about     → the focal node
-  wbs-supersedes → the prior spec note this reshape supersedes
+  about     → the focal node
+  supersedes → the prior spec note this reshape supersedes
 
 Node references in the body use [[wikilinks]] (each materializes a `references` edge), so the graph captures the lineage and disposition links.
 
@@ -53,7 +53,7 @@ The Reasoning section is load-bearing — capture the user's explanation of what
 - (none)
 
 ## References
-- Prior spec note: `[[wbs/<project>/<focal>-spec-prior]]` (archived; also linked via `wbs-supersedes`)
+- Prior spec note: `[[wbs/<project>/<focal>-spec-prior]]` (archived; also linked via `supersedes`)
 - New spec note: `[[wbs/<project>/<focal>-spec]]`
 - Prior plan note (if any): `[[wbs/<project>/<focal>-plan-prior]]` (archived)
 - Parent reshape note (if nested): `[[wbs/<project>/<parent>-reshape]]`
