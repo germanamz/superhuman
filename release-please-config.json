@@ -2,7 +2,8 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "node",
   "include-component-in-tag": true,
-  "separate-pull-requests": true,
+  "separate-pull-requests": false,
+  "pull-request-title-pattern": "chore(marketplace): release ${branch}",
   "bootstrap-sha": "2ada5e786ac01d6becc03948e3715b85017007ee",
   "changelog-sections": [
     { "type": "feat", "section": "Features" },

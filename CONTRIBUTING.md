@@ -109,14 +109,16 @@ The App must be installed on this repo with **Contents: read & write**, **Pull r
 
 1. Push conventional commits to `main` (typically via squash-merged PRs whose titles follow the format above).
 2. The `.github/workflows/release-please.yml` workflow runs on every push to `main`.
-3. For each component with unreleased changes, release-please opens (or updates) a release PR. The PR contains:
-   - bumped `version` in the component's `package.json`, in `plugin.json` (for plugins), and in the matching marketplace entry
-   - generated `CHANGELOG.md` updates
+3. release-please opens (or updates) a **single aggregated release PR** covering every component with unreleased changes. The PR contains:
+   - bumped `version` in each affected component's `package.json`, in `plugin.json` (for plugins), and in the matching marketplace entry
+   - generated `CHANGELOG.md` updates for each affected component
    - updated `.release-please-manifest.json`
 4. Review and merge the release PR.
-5. release-please tags the release (`<component>-v<x.y.z>`) and creates a GitHub Release with the changelog.
+5. release-please tags each released component (`<component>-v<x.y.z>`) and creates a GitHub Release per component with the changelog.
 
 The default `GITHUB_TOKEN` is enough — no PAT required.
+
+> **Why one PR?** `separate-pull-requests: false` is set in `release-please-config.json` so every component bump rides in a single PR. The alternative (one PR per component) creates rebase churn — each merge invalidates the others, and reviewers chase a moving target. The tradeoff is you cannot ship one component without shipping any other component that also has pending changes; for a marketplace where the catalog and plugins ship together, that is the desired behavior. The aggregate PR's title comes from the top-level `pull-request-title-pattern` (`chore(marketplace): release ${branch}`) since per-package title patterns only apply to per-component PRs.
 
 ## Adding a new plugin to release-please
 
@@ -161,17 +163,17 @@ To onboard a new plugin called `<new>`:
 
    `extra-files` paths are resolved relative to the package directory unless they begin with `/`. The plugin's own `plugin.json` is package-relative; the shared marketplace catalog at the repo root must be written as `/.claude-plugin/marketplace.json` so release-please reaches it from outside the package.
 
-   `pull-request-title-pattern` is hardcoded per package because the only release-please title placeholders that substitute cleanly into a Conventional-Commits scope are `${version}` and `${branch}`. `${component}` renders with a leading space, and `${componentNoSpace}` is not exposed to the title template. Hardcoding the component name ensures the release PR title (and the squash commit subject release-please commits to the release branch) stays aligned with the repo's `scope-enum`, so the required `commitlint` and `lint-pr-title` checks pass.
+   The per-package `pull-request-title-pattern` is unused under the current aggregate-PR mode (the top-level pattern in `release-please-config.json` drives the single release PR's title). Keep it anyway so the config stays correct if the repo ever toggles back to `separate-pull-requests: true`. The pattern hardcodes the component name because the only release-please title placeholders that substitute cleanly into a Conventional-Commits scope are `${version}` and `${branch}` — `${component}` renders with a leading space, and `${componentNoSpace}` is not exposed to the title template.
 6. Seed `.release-please-manifest.json` with `"plugins/<new>": "0.0.0"`.
 7. Add `<new>` to the `scope-enum` list in `commitlint.config.mjs` and to the `scopes` list in `.github/workflows/lint-pr-title.yml` so the new scope is accepted by both lint layers.
 8. Open **two squash-merge PRs** in sequence (one per scope, since squash merge yields one commit per PR):
    - PR 1, title `feat(<new>): scaffold <new> plugin` — contains the plugin scaffold, per-plugin config-file changes (`plugins/<new>/**`, the `packages` entry in `release-please-config.json`, the entry in `.release-please-manifest.json`), and the lint-config scope additions from step 7.
    - PR 2, title `feat(marketplace): register <new> plugin` — contains the new entry in `.claude-plugin/marketplace.json#plugins[]` so the catalog version bumps too.
-9. After both merge to `main`, release-please opens **two** release PRs:
-   - one for `<new>` bumping `0.0.0 → 0.1.0`, publishing tag `<new>-v0.1.0`
-   - one for `marketplace` bumping the catalog version, publishing tag `marketplace-v<bumped>`
+9. After both merge to `main`, release-please opens a **single aggregated release PR** that bumps both:
+   - `<new>` from `0.0.0 → 0.1.0`, publishing tag `<new>-v0.1.0`
+   - `marketplace` to its next version, publishing tag `marketplace-v<bumped>`
 
-Merge both release PRs to publish.
+Merge the release PR to publish both tags.
 
 ## What not to commit by hand
 
