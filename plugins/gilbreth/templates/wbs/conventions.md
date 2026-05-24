@@ -117,6 +117,10 @@ Retirement is safe because the workspace is git-tracked: the full planning recor
 
 Distinction from archive: archive is for a *node within an active project* that no longer fits (reshape discards it but keeps the lineage queryable). Retirement is for a *whole project that's finished* (remove the coordination data; rely on git history). When in doubt mid-project, archive; only retire once the top-level effort is genuinely complete.
 
+## Migrating an existing workspace
+
+Workspaces bootstrapped by an earlier `gilbreth` version used `wbs-node`/`wbs-note` types and `wbs-*`-prefixed edges. The current shape consumes Elephant's `core` pack and uses the canonical `node`/`note` + `parent`/`about`/`supersedes`/`blocks` names. Run `/wbs-migrate` once per such workspace to rewrite frontmatter, swap the pack section in `tusk.toml`, and reindex. The command is idempotent — running it on an already-migrated workspace is a no-op. All edits land in git-tracked markdown, so a clean pre-migration commit is the full recovery path.
+
 ## Deferred reshapes
 
 When a child is reparented during a reshape but the user declines to reshape it now under its new parent, the child gets an explicit `## Open Questions` entry: "Reshape under new parent `[[<new-parent-path>]]` context — deferred from reshape `[[<reshape-note-path>]]` on <YYYY-MM-DD>." The next time the Karpathy gate runs on that child (e.g., before its decomposition or before it's brainstormed again), the open question forces resolution. Deferred reshapes are also listed in the focal node's reshape audit note.
