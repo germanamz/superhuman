@@ -19,12 +19,9 @@ Numbered for reference, not strict execution order. Order is reviewed each time 
 | 1 | **WBS spine** — the inverted-flame decomposition model, the skill set that walks a user from wide scope to narrow scope, and the data shape of a "node" at each level | — | — |
 | 2 | **Phase skills relocation + polish** — move the three phase skills (`phase-planning-rules`, `phase-continuity-review`, `phase-post-implementation-review`) from `~/.claude/skills/` into the `gilbreth` plugin, reshape for WBS context | — | — |
 | 3 | **WBS reshape** — `/wbs-reshape` command + `wbs-reshape` skill that lets WBS authors change direction mid-flight via context-aware re-brainstorm; auto-invokes from `wbs-orientation` on contradiction gates | — | — |
+| 4 | **Elephant** — a plugin that guides the agent to use [Tusk](https://github.com/germanamz/tusk) well as a short-to-medium-term memory keeper: capture learnings broadly into the graph and recall them narrowly (windowed) so knowledge transfers seamlessly across sessions. Shipped as the standalone `elephant` plugin (`core` type pack + `conventions`/`capture`/`recall` skills + `/bootstrap`) plus a gilbreth refactor that defers generic Tusk discipline to `elephant:conventions` and adopts the canonical unprefixed types. | `wbs/gilbreth-wbs/elephant/spec.md` † | per-story † |
 
-### In progress
-
-| # | Sub-project | Spec | Plan |
-|---|---|---|---|
-| 4 | **Elephant** — a plugin that guides the agent to use [Tusk](https://github.com/germanamz/tusk) well as a short-to-medium-term memory keeper: capture learnings broadly into the graph and recall them narrowly (windowed) so knowledge transfers seamlessly across sessions. Tracked as WBS initiative `wbs/gilbreth-wbs/elephant`, decomposed into 5 stories (knowledge pack, conventions skill, capture skill, recall skill, gilbreth refactor). | `wbs/gilbreth-wbs/elephant/spec` (Tusk note) | per-story |
+† Elephant's WBS tracking tree under `wbs/gilbreth-wbs/` was retired once the initiative completed — the live graph no longer carries planning data for shipped work (per `plugins/gilbreth/templates/wbs/conventions.md` "Retiring a completed project"). The full planning record (initiative + 5 story nodes, every spec/plan/brainstorm/reshape-audit note) is recoverable from git history at the parent of the retirement commit.
 
 ### Not started
 
