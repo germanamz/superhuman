@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0](https://github.com/germanamz/superhuman/compare/gilbreth-v1.0.0...gilbreth-v2.0.0) (2026-05-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **gilbreth:** consume elephant core pack and defer conventions ([#54](https://github.com/germanamz/superhuman/issues/54))
+
+### Features
+
+* **gilbreth:** add /wbs-migrate for the canonical-type migration ([#56](https://github.com/germanamz/superhuman/issues/56)) ([27c5658](https://github.com/germanamz/superhuman/commit/27c5658de3cdfdc54f0fd8d3ff63ed70d16bf451))
+* **gilbreth:** consume elephant core pack and defer conventions ([#54](https://github.com/germanamz/superhuman/issues/54)) ([0c30b91](https://github.com/germanamz/superhuman/commit/0c30b91a1db33e2e3783ce859231dd16b20c1986))
+
 ## [1.0.0](https://github.com/germanamz/superhuman/compare/gilbreth-v0.4.0...gilbreth-v1.0.0) (2026-05-21)
 
 
