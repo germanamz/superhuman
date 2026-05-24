@@ -15,7 +15,7 @@
     },
     {
       "name": "elephant",
-      "version": "0.0.0",
+      "version": "2.0.0",
       "description": "Makes Tusk the agent's short-to-medium-term memory keeper: capture learnings broadly into a knowledge graph and recall them narrowly across sessions.",
       "source": "./plugins/elephant"
     }
