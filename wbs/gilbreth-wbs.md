@@ -2,7 +2,7 @@
 type: wbs-node
 title: Build out the Gilbreth WBS
 level: project
-status: drafted
+status: completed
 order: 0
 ---
 

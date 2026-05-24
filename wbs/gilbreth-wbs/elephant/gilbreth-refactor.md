@@ -1,9 +1,9 @@
 ---
 type: wbs-node
 title: "gilbreth refactor: defer to elephant + drop type prefixes"
-order: 4
 level: story
-status: plan-ready
+status: completed
+order: 4
 ---
 
 # gilbreth refactor: defer to elephant + drop type prefixes

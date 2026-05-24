@@ -1,9 +1,9 @@
 ---
 type: wbs-node
 title: Elephant — Tusk as agent memory
+status: completed
 order: 0
 level: initiative
-status: ready-to-decompose
 ---
 
 # Elephant — Tusk as agent memory
